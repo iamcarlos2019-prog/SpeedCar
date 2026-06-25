@@ -957,6 +957,66 @@ textarea.form-input {
 }
 .contact-form .btn-red { align-self: flex-start; padding: 15px 40px; font-size: 12px; }
 
+/* ─────────────────────────────────────── INSTAGRAM */
+#instagram-cta {
+  padding: 80px 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.ig-icon {
+  width: 48px; height: 48px; margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  border-radius: 14px;
+}
+.ig-icon svg { width: 26px; height: 26px; }
+.ig-eyebrow {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.35em;
+  text-transform: uppercase; color: var(--red); margin-bottom: 12px;
+}
+.ig-headline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 4vw, 48px); font-weight: 300;
+  line-height: 1.15; color: var(--text); margin-bottom: 12px;
+}
+.ig-sub {
+  font-size: 14px; color: var(--faint);
+  max-width: 420px; margin: 0 auto 32px; line-height: 1.7;
+}
+.ig-handle {
+  display: inline-block;
+  font-size: 13px; font-weight: 500;
+  color: var(--faint); letter-spacing: 0.08em;
+  margin-bottom: 28px;
+}
+.ig-handle strong { color: var(--text); }
+.ig-btn {
+  position: relative;
+  display: inline-flex; align-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  text-decoration: none; padding: 14px 32px;
+  border-radius: 2px;
+  transition: opacity 0.2s;
+}
+.ig-btn:hover { opacity: 0.88; }
+.ig-btn .btn-label { margin-right: 28px; transition: opacity 0.4s; white-space: nowrap; }
+.ig-btn:hover .btn-label { opacity: 0; }
+.ig-btn .btn-icon {
+  position: absolute; right: 4px; top: 4px; bottom: 4px;
+  width: 22px; display: grid; place-items: center;
+  background: rgba(255,255,255,0.2); border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.ig-btn:hover .btn-icon { width: calc(100% - 8px); }
+.ig-btn .btn-icon svg { width: 14px; height: 14px; }
+
 /* ─────────────────────────────────────── FOOTER */
 footer {
   background: #050505;
@@ -1871,6 +1931,27 @@ footer {
   </div>
 </section>
 
+<!-- ══════════════════ INSTAGRAM CTA ══════════════════ -->
+<section id="instagram-cta">
+  <div class="container">
+    <div class="ig-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+        <circle cx="12" cy="12" r="4"/>
+        <circle cx="17.5" cy="6.5" r="0.5" fill="#fff" stroke="none"/>
+      </svg>
+    </div>
+    <div class="ig-eyebrow">Instagram</div>
+    <h2 class="ig-headline">Siga a Speed Car<br>e fique por dentro.</h2>
+    <p class="ig-sub">Dicas de manutenção, bastidores da oficina, promoções exclusivas e muito mais. Acompanhe nosso dia a dia e nunca perca uma novidade.</p>
+    <div class="ig-handle">Nos encontre em <strong>@speedcar.itu</strong></div><br>
+    <a class="ig-btn" href="https://www.instagram.com/speedcar.itu" target="_blank" rel="noopener">
+      <span class="btn-label">SEGUIR NO INSTAGRAM</span>
+      <span class="btn-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"/></svg></span>
+    </a>
+  </div>
+</section>
+
 <!-- ══════════════════ FOOTER ══════════════════ -->
 <footer>
   <div class="container">
@@ -1895,6 +1976,10 @@ footer {
     </div>
     <div class="footer-bottom">
       <span class="footer-copy">© 2026 Speed Car — Auto Mecânica e Elétrica. Todos os direitos reservados.</span>
+      <a href="https://www.instagram.com/speedcar.itu" target="_blank" rel="noopener" aria-label="Instagram" style="display:inline-flex;align-items:center;gap:8px;color:var(--faint);text-decoration:none;font-size:11px;letter-spacing:0.12em;transition:color 0.2s;" onmouseover="this.style.color='#e1306c'" onmouseout="this.style.color='var(--faint)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>
+        @speedcar.itu
+      </a>
       <span class="footer-badge">Itu · SP · Brasil</span>
     </div>
   </div>
