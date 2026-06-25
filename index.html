@@ -2270,14 +2270,13 @@ footer {
     var mCanvas  = document.getElementById('motor-canvas');
     var mCtx     = mCanvas.getContext('2d');
 
-    mVideo.pause();
-    mVideo.addEventListener('play', function() { mVideo.pause(); });
+    /* play naturally during extraction — avoids competing seeks that freeze display */
+    mVideo.play().catch(function() {});
 
     var mFrames      = [];
     var mTotal       = 0;
     var mProgress    = 0;
     var mCanvasReady = false;
-    var mSeekActive  = true;
     var mCurrentF    = 0;
     var mTargetF     = 0;
 
@@ -2343,9 +2342,9 @@ footer {
       mCanvasReady = true;
       mStartLoop();
       mCanvas.style.opacity = '1';
+      mVideo.pause();
       mVideo.style.opacity  = '0';
       setTimeout(function() {
-        mSeekActive = false;
         mVideo.style.display = 'none';
       }, 600);
     });
@@ -2376,11 +2375,6 @@ footer {
       end: 'bottom bottom',
       onUpdate: function(self) {
         mProgress = self.progress;
-        if (mSeekActive && mVideo.duration) {
-          var t = mProgress * mVideo.duration;
-          if (typeof mVideo.fastSeek === 'function') mVideo.fastSeek(t);
-          else mVideo.currentTime = t;
-        }
         if (mTotal > 0) mTargetF = mProgress * (mTotal - 1);
         mBeats.forEach(function(b) {
           var a = mBeatAnim(b, mProgress);
