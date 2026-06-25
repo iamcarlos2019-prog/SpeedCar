@@ -129,7 +129,10 @@ nav { display: flex; gap: 36px; }
 }
 
 .btn-red {
-  display: inline-block;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
   background: var(--red);
   color: #fff;
   font-family: 'Inter', sans-serif;
@@ -138,9 +141,33 @@ nav { display: flex; gap: 36px; }
   text-decoration: none;
   padding: 13px 28px;
   border: none; cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: background 0.3s;
 }
-.btn-red:hover { background: #c81825; transform: translateY(-1px); }
+.btn-red:hover { background: #c81825; }
+/* label text — fades out on hover */
+.btn-red .btn-label {
+  margin-right: 28px;
+  transition: opacity 0.4s;
+  white-space: nowrap;
+}
+.btn-red:hover .btn-label { opacity: 0; }
+/* chevron pill — expands to fill button on hover */
+.btn-red .btn-icon {
+  position: absolute;
+  right: 4px; top: 4px; bottom: 4px;
+  width: calc(22px);
+  display: grid; place-items: center;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  z-index: 1;
+}
+.btn-red:hover .btn-icon {
+  width: calc(100% - 8px);
+}
+.btn-red .btn-icon svg {
+  width: 14px; height: 14px; flex-shrink: 0;
+}
 
 .btn-outline {
   display: inline-block;
@@ -972,15 +999,27 @@ footer {
 
 .drawer-cta {
   margin-top: 28px;
-  display: block; text-align: center;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
   background: var(--red); color: #fff;
   font-size: 10px; font-weight: 700;
   letter-spacing: 0.18em; text-transform: uppercase;
   text-decoration: none; padding: 14px;
   border-radius: 2px;
-  transition: background 0.2s;
+  transition: background 0.3s;
 }
 .drawer-cta:hover { background: #c81825; }
+.drawer-cta .btn-label { margin-right: 22px; transition: opacity 0.4s; white-space: nowrap; }
+.drawer-cta:hover .btn-label { opacity: 0; }
+.drawer-cta .btn-icon {
+  position: absolute; right: 4px; top: 4px; bottom: 4px;
+  width: 20px; display: grid; place-items: center;
+  background: rgba(255,255,255,0.15); border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.drawer-cta:hover .btn-icon { width: calc(100% - 8px); }
+.drawer-cta .btn-icon svg { width: 13px; height: 13px; }
 
 @media (max-width: 900px) {
   nav { display: none; }
@@ -1041,7 +1080,10 @@ footer {
     <a class="nav-link" href="#sobre">Sobre</a>
     <a class="nav-link" href="#contato">Contato</a>
   </nav>
-  <a class="btn-red" href="https://wa.me/5511968644511" target="_blank" rel="noopener">AGENDAR</a>
+  <a class="btn-red" href="https://wa.me/5511968644511" target="_blank" rel="noopener">
+    <span class="btn-label">AGENDAR</span>
+    <span class="btn-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"/></svg></span>
+  </a>
   <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
@@ -1064,7 +1106,10 @@ footer {
     <a class="drawer-nav-link" href="#sobre">Sobre</a>
     <a class="drawer-nav-link" href="#contato">Contato</a>
   </nav>
-  <a class="drawer-cta" href="https://wa.me/5511968644511" target="_blank" rel="noopener">Agendar pelo WhatsApp</a>
+  <a class="drawer-cta" href="https://wa.me/5511968644511" target="_blank" rel="noopener">
+    <span class="btn-label">Agendar pelo WhatsApp</span>
+    <span class="btn-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"/></svg></span>
+  </a>
 </aside>
 
 <!-- ══════════════════ HERO (scroll-driven video) ══════════════════ -->
@@ -1185,7 +1230,10 @@ footer {
         </div>
 
         <div class="booking-submit">
-          <button type="submit" class="btn-red">SOLICITAR ORÇAMENTO</button>
+          <button type="submit" class="btn-red">
+            <span class="btn-label">SOLICITAR ORÇAMENTO</span>
+            <span class="btn-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"/></svg></span>
+          </button>
           <span class="booking-submit-note">Você será redirecionado ao WhatsApp</span>
         </div>
 
@@ -1724,7 +1772,10 @@ footer {
           <label class="form-label" for="cmsg">Mensagem</label>
           <textarea class="form-input" id="cmsg" placeholder="Como podemos te ajudar?"></textarea>
         </div>
-        <button type="submit" class="btn-red">ENVIAR MENSAGEM</button>
+        <button type="submit" class="btn-red">
+          <span class="btn-label">ENVIAR MENSAGEM</span>
+          <span class="btn-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,3 11,8 6,13"/></svg></span>
+        </button>
       </form>
 
       <!-- Map column -->
