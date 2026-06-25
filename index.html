@@ -26,13 +26,17 @@
   --header-h: 72px;
 }
 
-html { scroll-behavior: auto; }
+html {
+  scroll-behavior: auto;
+  overflow-x: hidden;
+}
 body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  max-width: 100vw;
 }
 
 
@@ -1156,8 +1160,9 @@ footer {
 /* ─────────────────────────────────────── RESPONSIVE */
 @media (max-width: 1100px) {
   .services-grid { grid-template-columns: 1fr 1fr; }
-  .diff-layout { grid-template-columns: 1fr; }
-  .diff-cta-box { max-width: 480px; }
+  .diff-layout   { grid-template-columns: 1fr; }
+  .diff-cta-box  { max-width: 480px; }
+  .contact-layout { grid-template-columns: 1fr 1fr; gap: 40px; }
 }
 /* ─────────────────────────────────────── MOBILE DRAWER */
 .nav-toggle {
@@ -1263,39 +1268,135 @@ footer {
 .drawer-cta:hover .btn-icon { width: calc(100% - 8px); }
 .drawer-cta .btn-icon svg { width: 13px; height: 13px; }
 
+/* ── 900 px — tablets ── */
 @media (max-width: 900px) {
   nav { display: none; }
   header .btn-red { display: none; }
   .nav-toggle { display: flex; }
-  header { padding: 0 24px; }
-  .container { padding: 0 24px; }
-  .booking-layout { grid-template-columns: 1fr; gap: 48px; }
-  .booking-form { grid-template-columns: 1fr; }
-  .form-field:nth-child(even) { padding-left: 0; border-left: none; }
+  header { padding: 0 20px; }
+  .container { padding: 0 20px; }
+
+  /* hero */
+  #beat1 { left: 20px; right: 20%; }
+
+  /* motor beats — widen so text doesn't get crushed */
+  #mbeat2 { right: 20%; }
+  #mbeat3 { left: 20%; }
+
+  /* sections */
+  #servicos   { padding: 72px 0 56px; }
+  #depoimentos{ padding: 72px 0; }
+  #agendar    { padding: 64px 0; }
+  #contato    { padding: 72px 0; }
+  #diferenciais { padding: 72px 0; }
+  footer      { padding: 48px 0 32px; }
+
+  .booking-layout { grid-template-columns: 1fr; gap: 40px; }
+  .booking-form   { grid-template-columns: 1fr 1fr; }
+
   #sobre { grid-template-columns: 1fr; }
-  .sobre-visual-col { height: 340px; }
-  .contact-layout { grid-template-columns: 1fr; gap: 48px; }
-  #contact-map { height: 280px; }
+  .sobre-visual-col { height: 320px; }
+  .sobre-text-col   { padding: 64px 40px; }
+
+  .contact-layout { grid-template-columns: 1fr; gap: 40px; }
+  #contact-map    { height: 280px; }
+  .contact-map-label { margin-top: 0; }
+
   .stats-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
-  .stat-item { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 32px; }
-  .stat-item:last-child, .stat-item:nth-child(even) { border-bottom: none; }
-  .dep-grid { grid-template-columns: 1fr; }
-  .footer-top { grid-template-columns: 1fr; }
-  .footer-contact-list { align-items: flex-start; }
-  #beat1 { max-width: 80%; left: 5%; }
-  .booking-inner { flex-direction: column; gap: 28px; }
-  .booking-form { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 600px) {
-  .services-grid { grid-template-columns: 1fr; }
+  .stat-item {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+  }
+  .stat-item:last-child,
+  .stat-item:nth-child(even) { border-bottom: none; }
+
+  .footer-top           { grid-template-columns: 1fr; gap: 32px; }
+  .footer-contact-list  { align-items: flex-start; }
+  .footer-bottom        { flex-direction: column; gap: 12px; align-items: flex-start; }
+
   .diff-grid { grid-template-columns: 1fr; }
-  .form-row { grid-template-columns: 1fr; }
-  .booking-form { grid-template-columns: 1fr; }
-  .hero-badges { flex-direction: column; gap: 12px; align-items: flex-start; }
-  .beat1-title .t-white, .beat1-title .t-red { font-size: 30px; }
-  #beat6 { white-space: normal; text-align: center; }
-  .sobre-text-col { padding: 60px 24px; }
-  .footer-bottom { flex-direction: column; gap: 12px; }
+}
+
+/* ── 600 px — phones ── */
+@media (max-width: 600px) {
+  :root { --header-h: 60px; }
+
+  .container { padding: 0 16px; }
+
+  /* hero */
+  #beat1 { left: 16px; right: 16px; }
+  .beat1-title .t-white,
+  .beat1-title .t-red   { font-size: clamp(28px, 8vw, 38px); }
+  .beat1-sub            { font-size: 13px; }
+  .hero-badges          { flex-direction: column; gap: 10px; align-items: flex-start; }
+
+  /* hero side-overlays — let them fill horizontally */
+  #beat2, #beat4 { left: 16px; right: 16px; }
+  #beat3         { left: 16px; right: 16px; text-align: left; }
+  #beat3 .overlay-sub::before { margin-left: 0; }
+  #beat5, #beat6 { white-space: normal; text-align: center; }
+  #beat5 .overlay-sub { max-width: calc(100vw - 48px); }
+
+  /* motor beats — stack full-width on phones */
+  #mbeat2 { right: 0; }
+  #mbeat3 { left: 0; right: 0; }
+  .motor-title { font-size: clamp(26px, 7.5vw, 44px); }
+  .motor-sub   { max-width: 100%; font-size: 13px; }
+  .motor-stat  { font-size: 9px; padding: 8px 12px; margin-top: 16px; }
+
+  /* services */
+  .services-grid    { grid-template-columns: 1fr; }
+  .service-card-visual { height: 220px; }
+
+  /* stats */
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .stat-item  { padding: 0 12px; }
+  .stat-number { font-size: 44px; }
+
+  /* about */
+  .sobre-text-col { padding: 48px 16px; }
+
+  /* diferenciais */
+  .diff-grid { grid-template-columns: 1fr; }
+  .diff-item { margin: -1px 0 0 0; } /* remove left negative margin */
+  .diff-cta-box { padding: 36px 24px; }
+
+  /* booking */
+  .booking-form  { grid-template-columns: 1fr; }
+  .form-field:nth-child(even) { padding-left: 0; border-left: none; }
+  .booking-submit { flex-direction: column; align-items: stretch; gap: 12px; }
+  .booking-submit .btn-red { width: 100%; justify-content: center; }
+  .booking-submit-note { text-align: center; }
+
+  /* contact */
+  .form-row      { grid-template-columns: 1fr; gap: 0; }
+  .contact-pillars { flex-direction: column; }
+  .contact-pillar  {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .contact-pillar:last-child { border-bottom: none; }
+  .contact-form .btn-red { width: 100%; justify-content: center; }
+
+  /* instagram */
+  .ig-sub  { max-width: 100%; }
+  .ig-btn  { width: 100%; justify-content: center; }
+
+  /* footer */
+  .footer-top   { gap: 24px; }
+  .footer-bottom{ flex-direction: column; gap: 10px; align-items: flex-start; }
+
+  /* section padding */
+  #servicos    { padding: 56px 0 44px; }
+  #depoimentos { padding: 56px 0; }
+  #agendar     { padding: 56px 0; }
+  #contato     { padding: 56px 0; }
+  #instagram-cta { padding: 56px 0; }
+  #diferenciais{ padding: 56px 0; }
+  #stats       { padding: 44px 0; }
+  footer       { padding: 44px 0 28px; }
+  .red-rule    { margin-bottom: 36px; }
 }
 </style>
 </head>
