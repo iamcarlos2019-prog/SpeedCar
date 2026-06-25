@@ -571,37 +571,96 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator { filter: inver
 #depoimentos {
   padding: 110px 0;
   background: var(--bg);
+  overflow: hidden;
 }
-.dep-header { text-align: center; margin-bottom: 0; }
-.dep-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.dep-header { text-align: center; margin-bottom: 56px; }
+
+/* slider track */
+.dep-slider-wrap {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+  mask-image:         linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
+}
+.dep-track {
+  display: flex;
   gap: 20px;
+  width: max-content;
+  animation: depSlide 38s linear infinite;
 }
+.dep-track:hover { animation-play-state: paused; }
+
+@keyframes depSlide {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - 10px)); }
+}
+
+/* cards */
 .dep-card {
+  display: flex;
+  flex-direction: column;
+  width: 480px;
+  flex-shrink: 0;
   background: var(--bg2);
   border: 1px solid var(--border);
-  padding: 40px 36px;
+  border-radius: 4px;
   transition: border-color 0.25s;
 }
 .dep-card:hover { border-color: rgba(225,29,42,0.35); }
+.dep-body {
+  padding: 32px 28px 28px;
+  flex: 1;
+}
 .dep-stars {
-  color: var(--red); font-size: 16px;
-  letter-spacing: 3px; margin-bottom: 22px;
+  color: var(--red); font-size: 13px;
+  letter-spacing: 3px; margin-bottom: 18px;
 }
 .dep-text {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic; font-weight: 300;
-  font-size: 18px; line-height: 1.65;
-  color: var(--text); margin-bottom: 28px;
+  font-size: 20px; line-height: 1.6;
+  color: var(--text);
 }
-.dep-sep {
-  width: 28px; height: 1px;
-  background: var(--red); margin-bottom: 16px;
+.dep-footer {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--border);
 }
-.dep-name {
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 0.25em; color: var(--faint);
+.dep-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  flex: 1;
+}
+.dep-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; font-weight: 600;
+  color: var(--red);
+  flex-shrink: 0;
+}
+.dep-info-name {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text);
+}
+.dep-info-local {
+  font-size: 10px; color: var(--faint);
+  letter-spacing: 0.12em; margin-top: 2px;
+}
+.dep-divider {
+  width: 1px; height: 48px;
+  background: var(--border); flex-shrink: 0;
+}
+.dep-rating {
+  padding: 0 20px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.2em; color: var(--red);
   text-transform: uppercase;
 }
 
@@ -1302,25 +1361,229 @@ footer {
       <h2 class="section-title">O Que Nossos Clientes Dizem</h2>
       <div class="red-rule center"></div>
     </div>
-    <div class="dep-grid">
+  </div>
+
+  <div class="dep-slider-wrap">
+    <div class="dep-track" id="dep-track">
+
+      <!-- card 1 -->
       <div class="dep-card">
-        <div class="dep-stars">★★★★★</div>
-        <p class="dep-text">"Atendimento honesto e serviço impecável. Fui bem recebido, recebi o orçamento detalhado e meu carro ficou perfeito."</p>
-        <div class="dep-sep"></div>
-        <div class="dep-name">Carlos M. — Itu, SP</div>
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Atendimento honesto e serviço impecável. Recebi orçamento detalhado e meu carro saiu perfeito. Recomendo sem hesitar."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">CM</div>
+            <div>
+              <div class="dep-info-name">Carlos Mendes</div>
+              <div class="dep-info-local">Itu, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+
+      <!-- card 2 -->
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Diagnóstico preciso e preço justo. Outras oficinas queriam me cobrar o dobro por um problema que eles resolveram em horas."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">AS</div>
+            <div>
+              <div class="dep-info-name">Ana Souza</div>
+              <div class="dep-info-local">Itu, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+
+      <!-- card 3 -->
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Levei meu carro sem hora marcada e mesmo assim fui atendido na hora. Transparência total do início ao fim do serviço."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">RL</div>
+            <div>
+              <div class="dep-info-name">Ricardo Lima</div>
+              <div class="dep-info-local">Salto, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+
+      <!-- card 4 -->
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Meu carro estava com problema elétrico há meses. A Speed Car identificou e resolveu em um dia. Profissionalismo de alto nível."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">FO</div>
+            <div>
+              <div class="dep-info-name">Fernanda Oliveira</div>
+              <div class="dep-info-local">Itu, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+
+      <!-- card 5 -->
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Equipamentos modernos, equipe capacitada e preço honesto. É a única oficina que confio para cuidar do meu veículo."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">MB</div>
+            <div>
+              <div class="dep-info-name">Marcelo Barbosa</div>
+              <div class="dep-info-local">Porto Feliz, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+
+      <!-- card 6 -->
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Revisão completa feita com cuidado e agilidade. Recebi fotos de cada etapa e o carro voltou melhor do que antes. Nota 10."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">JR</div>
+            <div>
+              <div class="dep-info-name">Juliana Rocha</div>
+              <div class="dep-info-local">Sorocaba, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+
+      <!-- duplicate set for infinite loop -->
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Atendimento honesto e serviço impecável. Recebi orçamento detalhado e meu carro saiu perfeito. Recomendo sem hesitar."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">CM</div>
+            <div>
+              <div class="dep-info-name">Carlos Mendes</div>
+              <div class="dep-info-local">Itu, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
       </div>
       <div class="dep-card">
-        <div class="dep-stars">★★★★★</div>
-        <p class="dep-text">"Diagnóstico preciso e preço justo. Outras oficinas tentaram me cobrar o dobro por um problema que eles resolveram rápido."</p>
-        <div class="dep-sep"></div>
-        <div class="dep-name">Ana S. — Itu, SP</div>
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Diagnóstico preciso e preço justo. Outras oficinas queriam me cobrar o dobro por um problema que eles resolveram em horas."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">AS</div>
+            <div>
+              <div class="dep-info-name">Ana Souza</div>
+              <div class="dep-info-local">Itu, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
       </div>
       <div class="dep-card">
-        <div class="dep-stars">★★★★★</div>
-        <p class="dep-text">"Rápido, transparente e com garantia real. Levei meu carro sem hora marcada e mesmo assim fui atendido na hora."</p>
-        <div class="dep-sep"></div>
-        <div class="dep-name">Ricardo L. — Salto, SP</div>
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Levei meu carro sem hora marcada e mesmo assim fui atendido na hora. Transparência total do início ao fim do serviço."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">RL</div>
+            <div>
+              <div class="dep-info-name">Ricardo Lima</div>
+              <div class="dep-info-local">Salto, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
       </div>
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Meu carro estava com problema elétrico há meses. A Speed Car identificou e resolveu em um dia. Profissionalismo de alto nível."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">FO</div>
+            <div>
+              <div class="dep-info-name">Fernanda Oliveira</div>
+              <div class="dep-info-local">Itu, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Equipamentos modernos, equipe capacitada e preço honesto. É a única oficina que confio para cuidar do meu veículo."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">MB</div>
+            <div>
+              <div class="dep-info-name">Marcelo Barbosa</div>
+              <div class="dep-info-local">Porto Feliz, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+      <div class="dep-card">
+        <div class="dep-body">
+          <div class="dep-stars">★★★★★</div>
+          <p class="dep-text">"Revisão completa feita com cuidado e agilidade. Recebi fotos de cada etapa e o carro voltou melhor do que antes. Nota 10."</p>
+        </div>
+        <div class="dep-footer">
+          <div class="dep-author">
+            <div class="dep-avatar">JR</div>
+            <div>
+              <div class="dep-info-name">Juliana Rocha</div>
+              <div class="dep-info-local">Sorocaba, SP</div>
+            </div>
+          </div>
+          <div class="dep-divider"></div>
+          <div class="dep-rating">5 / 5</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
