@@ -381,6 +381,75 @@ section { position: relative; }
 }
 .red-rule.center { margin-left: auto; margin-right: auto; }
 
+/* ─────────────────────────────────────── MOTOR SECTION */
+#motor {
+  position: relative;
+  height: 500vh;
+}
+#motor-sticky {
+  position: sticky; top: 0;
+  width: 100%; height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+#motor-canvas, #motor-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  transform: scale(1.18) translate(-2%, -2%);
+  transform-origin: center center;
+  transition: opacity 0.6s ease;
+}
+#motor-video  { object-fit: cover; pointer-events: none; opacity: 1; }
+#motor-canvas { display: block; opacity: 0; }
+#motor-sticky::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 18%, transparent 78%, rgba(0,0,0,0.85) 100%),
+    linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 55%);
+}
+
+/* Motor beats */
+.motor-beat {
+  position: absolute; z-index: 2;
+  pointer-events: none;
+  will-change: opacity, transform;
+  opacity: 0;
+}
+#mbeat1 { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; }
+#mbeat2 { top: var(--header-h); left: 6%; right: 50%; padding-top: 14vh; }
+#mbeat3 { bottom: 10%; left: 6%; right: 50%; }
+#mbeat4 { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 70%; }
+
+.motor-eyebrow {
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.45em; color: var(--red);
+  text-transform: uppercase; margin-bottom: 18px;
+}
+.motor-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600; line-height: 1.0;
+  font-size: clamp(36px, 5.5vw, 72px);
+  color: #fff;
+  text-shadow: 0 2px 40px rgba(0,0,0,0.8);
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.motor-title .t-red { color: var(--red); display: block; }
+.motor-sub {
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: rgba(255,255,255,0.72);
+  line-height: 1.7; max-width: 400px;
+}
+#mbeat1 .motor-sub { margin: 0 auto; }
+.motor-stat {
+  display: inline-flex; align-items: center; gap: 10px;
+  border: 1px solid rgba(225,29,42,0.4);
+  padding: 10px 20px; margin-top: 24px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+.motor-stat strong { color: var(--red); font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; }
+
 /* ─────────────────────────────────────── BOOKING */
 #agendar {
   background: var(--bg2);
@@ -1312,6 +1381,44 @@ footer {
   </div>
 </section>
 
+<!-- ══════════════════ MOTOR SECTION ══════════════════ -->
+<section id="motor" aria-label="Motor">
+  <div id="motor-sticky">
+    <canvas id="motor-canvas"></canvas>
+    <video id="motor-video" src="/assets/speedcar-motor.mp4" preload="auto" muted playsinline webkit-playsinline></video>
+    <video id="motor-extract" src="/assets/speedcar-motor.mp4" preload="auto" muted playsinline style="display:none" aria-hidden="true"></video>
+
+    <!-- Beat 1: abertura central -->
+    <div class="motor-beat" id="mbeat1">
+      <div class="motor-eyebrow">Motor · Diagnóstico · Precisão</div>
+      <h2 class="motor-title">O Coração<br>do Seu Carro<br><span class="t-red">nas Mãos Certas.</span></h2>
+      <p class="motor-sub">Cada falha tem uma causa. Cada causa tem uma solução. Na Speed Car, o motor do seu veículo recebe a atenção técnica que merece.</p>
+    </div>
+
+    <!-- Beat 2: diagnóstico -->
+    <div class="motor-beat" id="mbeat2">
+      <div class="motor-eyebrow">Tecnologia Avançada</div>
+      <h2 class="motor-title">Diagnóstico<br><span class="t-red">que Revela</span><br>Tudo.</h2>
+      <p class="motor-sub">Scanner multimarcas de última geração conectado diretamente ao sistema do veículo. Nada passa despercebido — nem a menor falha eletrônica.</p>
+    </div>
+
+    <!-- Beat 3: peças -->
+    <div class="motor-beat" id="mbeat3">
+      <div class="motor-eyebrow">Peças & Qualidade</div>
+      <div class="motor-title" style="font-size:clamp(26px,3.8vw,52px)">Somente Peças<br><span class="t-red">Originais e</span><br>de Primeira Linha.</div>
+      <p class="motor-sub">Trabalhamos com fornecedores certificados. A qualidade começa na peça e termina na garantia do serviço.</p>
+      <div class="motor-stat"><strong>10+</strong> Anos requalificando motores em Itu</div>
+    </div>
+
+    <!-- Beat 4: fechamento -->
+    <div class="motor-beat" id="mbeat4">
+      <div class="motor-eyebrow">Garantia Real</div>
+      <h2 class="motor-title"><span class="t-red">Entregamos</span><br>o que<br>Prometemos.</h2>
+      <p class="motor-sub">Transparência total do orçamento à entrega. Você aprova cada etapa antes de qualquer serviço começar no seu motor.</p>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════════ BOOKING ══════════════════ -->
 <div id="agendar">
   <div class="container">
@@ -2162,6 +2269,136 @@ footer {
       heroVideo.style.display = 'none';
     }, 600);
   });
+
+  /* ══════════════════════════════════════════════════════
+     MOTOR SECTION — scroll-driven video (same hybrid arch)
+     ══════════════════════════════════════════════════════ */
+  (function() {
+    var mVideo   = document.getElementById('motor-video');
+    var mExtract = document.getElementById('motor-extract');
+    var mCanvas  = document.getElementById('motor-canvas');
+    var mCtx     = mCanvas.getContext('2d');
+
+    mVideo.pause();
+    mVideo.addEventListener('play', function() { mVideo.pause(); });
+
+    var mFrames      = [];
+    var mTotal       = 0;
+    var mProgress    = 0;
+    var mCanvasReady = false;
+    var mSeekActive  = true;
+    var mCurrentF    = 0;
+    var mTargetF     = 0;
+
+    var mW = window.innerWidth < 768 ? 854  : 1280;
+    var mH = window.innerWidth < 768 ? 480  : 720;
+    var mFPS = 4;
+
+    /* resize */
+    function mResize() {
+      mCanvas.width  = Math.round(window.innerWidth);
+      mCanvas.height = Math.round(window.innerHeight);
+      if (mCanvasReady && mFrames.length) mRender();
+    }
+    mResize();
+    window.addEventListener('resize', mResize);
+
+    function mRender() {
+      var idx = Math.max(0, Math.min(mFrames.length - 1, Math.round(mCurrentF)));
+      var bmp = mFrames[idx];
+      if (!bmp) return;
+      var cw = mCanvas.width, ch = mCanvas.height;
+      var bw = bmp.width || mW, bh = bmp.height || mH;
+      var sc = Math.max(cw / bw, ch / bh);
+      mCtx.drawImage(bmp, (cw - bw * sc) / 2, (ch - bh * sc) / 2, bw * sc, bh * sc);
+    }
+
+    /* canvas lerp loop */
+    function mStartLoop() {
+      (function loop() {
+        if (!mCanvasReady) return;
+        requestAnimationFrame(loop);
+        var d = mTargetF - mCurrentF;
+        mCurrentF = Math.abs(d) < 0.08 ? mTargetF : mCurrentF + d * 0.18;
+        mRender();
+      }());
+    }
+
+    /* frame extraction */
+    async function mExtractFrames() {
+      var src = mExtract;
+      if (src.readyState < 1) {
+        await new Promise(function(r) { src.addEventListener('loadedmetadata', r, { once: true }); });
+      }
+      var duration = src.duration;
+      mTotal = Math.ceil(duration * mFPS);
+      var off = document.createElement('canvas');
+      off.width = mW; off.height = mH;
+      var offCtx = off.getContext('2d');
+      for (var i = 0; i < mTotal; i++) {
+        src.currentTime = (i / Math.max(mTotal - 1, 1)) * duration;
+        await new Promise(function(r) { src.addEventListener('seeked', r, { once: true }); });
+        offCtx.drawImage(src, 0, 0, mW, mH);
+        var snap = document.createElement('canvas');
+        snap.width = mW; snap.height = mH;
+        snap.getContext('2d').drawImage(off, 0, 0);
+        mFrames.push(snap);
+      }
+    }
+
+    mExtractFrames().then(function() {
+      mCurrentF = mTargetF = mProgress * (mTotal - 1);
+      mRender();
+      mCanvasReady = true;
+      mStartLoop();
+      mCanvas.style.opacity = '1';
+      mVideo.style.opacity  = '0';
+      setTimeout(function() {
+        mSeekActive = false;
+        mVideo.style.display = 'none';
+      }, 600);
+    });
+
+    /* beats */
+    var mBeats = [
+      { el: document.getElementById('mbeat1'), in: 0.00, peak: 0.12, out: 0.28 },
+      { el: document.getElementById('mbeat2'), in: 0.22, peak: 0.38, out: 0.55 },
+      { el: document.getElementById('mbeat3'), in: 0.48, peak: 0.62, out: 0.78 },
+      { el: document.getElementById('mbeat4'), in: 0.72, peak: 0.85, out: 1.00 },
+    ];
+
+    function mBeatAnim(b, p) {
+      var op = 0, ty = 18;
+      if (p >= b.in && p <= b.out) {
+        var fade = Math.min((p - b.in) / 0.08, 1);
+        var fadeOut = p > b.peak ? Math.max(1 - (p - b.peak) / (b.out - b.peak), 0) : 1;
+        op = fade * fadeOut;
+        ty = (1 - fade) * 18;
+      }
+      return { opacity: op, ty: ty };
+    }
+
+    /* ScrollTrigger */
+    ScrollTrigger.create({
+      trigger: '#motor',
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: function(self) {
+        mProgress = self.progress;
+        if (mSeekActive && mVideo.duration) {
+          var t = mProgress * mVideo.duration;
+          if (typeof mVideo.fastSeek === 'function') mVideo.fastSeek(t);
+          else mVideo.currentTime = t;
+        }
+        if (mTotal > 0) mTargetF = mProgress * (mTotal - 1);
+        mBeats.forEach(function(b) {
+          var a = mBeatAnim(b, mProgress);
+          b.el.style.opacity   = a.opacity;
+          b.el.style.transform = 'translateY(' + a.ty + 'px)';
+        });
+      }
+    });
+  }());
 
   /* ── Header: turns dark when booking bar enters view ── */
   ScrollTrigger.create({
