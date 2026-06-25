@@ -1,6 +1,7 @@
 ﻿node_modules/
 .claude/
 *.jpeg
+!assets/*.jpeg
 SpeedCar1.mp4
 SpeedCar2.mp4
 SpeedCar3.mp4
