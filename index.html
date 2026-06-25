@@ -414,11 +414,12 @@ section { position: relative; }
   pointer-events: none;
   will-change: opacity, transform;
   opacity: 0;
+  padding: 0 clamp(24px, 6vw, 80px);
 }
-#mbeat1 { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; }
-#mbeat2 { top: var(--header-h); left: 6%; right: 50%; padding-top: 14vh; }
-#mbeat3 { bottom: 10%; left: 6%; right: 50%; }
-#mbeat4 { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 70%; }
+#mbeat1 { top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center; }
+#mbeat2 { top: var(--header-h); left: 0; right: 48%; padding-top: 14vh; }
+#mbeat3 { bottom: 10%; left: 0; right: 48%; }
+#mbeat4 { top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center; }
 
 .motor-eyebrow {
   font-size: 9px; font-weight: 600;
@@ -2359,18 +2360,18 @@ footer {
       }, 600);
     });
 
-    /* beats */
+    /* beats — center:true keeps the CSS translateY(-50%) base */
     var mBeats = [
-      { el: document.getElementById('mbeat1'), in: 0.00, peak: 0.12, out: 0.28 },
-      { el: document.getElementById('mbeat2'), in: 0.22, peak: 0.38, out: 0.55 },
-      { el: document.getElementById('mbeat3'), in: 0.48, peak: 0.62, out: 0.78 },
-      { el: document.getElementById('mbeat4'), in: 0.72, peak: 0.85, out: 1.00 },
+      { el: document.getElementById('mbeat1'), in: 0.00, peak: 0.12, out: 0.28, center: true  },
+      { el: document.getElementById('mbeat2'), in: 0.22, peak: 0.38, out: 0.55, center: false },
+      { el: document.getElementById('mbeat3'), in: 0.48, peak: 0.62, out: 0.78, center: false },
+      { el: document.getElementById('mbeat4'), in: 0.72, peak: 0.85, out: 1.00, center: true  },
     ];
 
     function mBeatAnim(b, p) {
       var op = 0, ty = 18;
       if (p >= b.in && p <= b.out) {
-        var fade = Math.min((p - b.in) / 0.08, 1);
+        var fade    = Math.min((p - b.in) / 0.08, 1);
         var fadeOut = p > b.peak ? Math.max(1 - (p - b.peak) / (b.out - b.peak), 0) : 1;
         op = fade * fadeOut;
         ty = (1 - fade) * 18;
@@ -2394,7 +2395,9 @@ footer {
         mBeats.forEach(function(b) {
           var a = mBeatAnim(b, mProgress);
           b.el.style.opacity   = a.opacity;
-          b.el.style.transform = 'translateY(' + a.ty + 'px)';
+          b.el.style.transform = b.center
+            ? 'translateY(calc(-50% + ' + a.ty + 'px))'
+            : 'translateY(' + a.ty + 'px)';
         });
       }
     });
