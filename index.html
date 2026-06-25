@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speed Car — Mecânica & Elétrica em Itu, SP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+/* ─────────────────────────────────────── RESET + VARS */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0A0A0A;
+  --bg2:     #111111;
+  --bg3:     #181818;
+  --red:     #E11D2A;
+  --red-low: rgba(225,29,42,0.10);
+  --red-mid: rgba(225,29,42,0.75);
+  --red-glow:rgba(225,29,42,0.25);
+  --text:    rgba(255,255,255,0.92);
+  --faint:   rgba(255,255,255,0.45);
+  --border:  rgba(255,255,255,0.07);
+  --header-h: 72px;
+}
+
+html { scroll-behavior: auto; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* ─────────────────────────────────────── LOADING SCREEN */
+#loading-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0A0A0A;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 32px;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+#loading-screen .ld-logo {
+  height: 64px; width: auto;
+  opacity: 0;
+  animation: ldFadeUp 0.7s 0.2s ease forwards;
+}
+#loading-screen .ld-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  opacity: 0;
+  animation: ldFadeUp 0.7s 0.45s ease forwards;
+}
+#loading-screen .ld-bar-wrap {
+  width: 160px; height: 1px;
+  background: rgba(255,255,255,0.10);
+  overflow: hidden;
+  opacity: 0;
+  animation: ldFadeUp 0.7s 0.6s ease forwards;
+}
+#loading-screen .ld-bar {
+  height: 100%;
+  background: var(--red);
+  width: 0%;
+  transition: width 0.15s linear;
+}
+@keyframes ldFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────── SCROLL BAR */
+#scroll-progress { display: none; }
+
+/* ─────────────────────────────────────── HEADER */
+header {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px;
+  z-index: 500;
+  transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+}
+header.scrolled {
+  background: rgba(10,10,10,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom-color: rgba(225,29,42,0.18);
+}
+
+.logo-wrap { display: flex; align-items: center; text-decoration: none; }
+.logo-img { height: 42px; width: auto; object-fit: contain; display: block; }
+.logo-main {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px; font-weight: 600;
+  letter-spacing: 0.22em; color: var(--text);
+  line-height: 1;
+}
+.logo-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 0.32em; color: var(--red);
+  text-transform: uppercase; line-height: 1;
+}
+
+nav { display: flex; gap: 36px; }
+.nav-link {
+  font-size: 11px; font-weight: 400;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--faint); text-decoration: none;
+  padding-bottom: 3px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--text); border-bottom-color: var(--red);
+}
+
+.btn-red {
+  display: inline-block;
+  background: var(--red);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  text-decoration: none;
+  padding: 13px 28px;
+  border: none; cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-red:hover { background: #c81825; transform: translateY(-1px); }
+
+.btn-outline {
+  display: inline-block;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  text-decoration: none;
+  padding: 13px 28px;
+  border: 1px solid rgba(255,255,255,0.25);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover { border-color: var(--red); color: var(--red); }
+
+/* ─────────────────────────────────────── HERO */
+#inicio {
+  position: relative;
+  height: 800vh;
+}
+#hero-sticky {
+  position: sticky; top: 0;
+  width: 100%; height: 100vh;
+  overflow: hidden; background: #050505;
+}
+/* Both layers share the same zoom/pan (hides watermark corner).
+   Video starts visible; canvas fades in once all frames are ready. */
+#hero-video, #hero-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  transform: scale(1.22) translate(-4%, -4%);
+  transform-origin: center center;
+  transition: opacity 0.6s ease;
+}
+#hero-video  { object-fit: cover; pointer-events: none; opacity: 1; }
+#hero-canvas { display: block; opacity: 0; }
+/* Left-gradient so text reads; subtle red glow right */
+#hero-sticky::before {
+  content: '';
+  position: absolute;
+  right: -5%; top: 20%;
+  width: 55%; height: 65%;
+  background: radial-gradient(ellipse at center, rgba(225,29,42,0.12) 0%, transparent 68%);
+  pointer-events: none; z-index: 1;
+}
+#hero-sticky::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    /* Left dark column — text readability */
+    linear-gradient(108deg,
+      rgba(10,10,10,0.94) 0%,
+      rgba(10,10,10,0.78) 38%,
+      rgba(10,10,10,0.25) 65%,
+      rgba(10,10,10,0.05) 100%
+    ),
+    /* Top + bottom vignette */
+    linear-gradient(to bottom,
+      rgba(10,10,10,0.40) 0%,
+      transparent 16%,
+      transparent 68%,
+      rgba(10,10,10,0.80) 88%,
+      rgba(10,10,10,0.98) 100%
+    ),
+    /* Bottom-right radial darkener — kills watermark remnants */
+    radial-gradient(ellipse at 100% 100%,
+      rgba(10,10,10,0.99) 0%,
+      rgba(10,10,10,0.85) 18%,
+      transparent 42%
+    );
+  pointer-events: none; z-index: 1;
+}
+
+/* ── Overlays */
+.overlay {
+  position: absolute;
+  opacity: 0; pointer-events: none;
+  will-change: transform, opacity; z-index: 2;
+}
+
+/* Beat 1 — main hero copy, left column */
+#beat1 {
+  top: var(--header-h);   /* always starts below the fixed header */
+  left: 6%;
+  right: 48%;             /* constrain to left half */
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 8vh;
+}
+.beat1-eyebrow {
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 0.45em; color: var(--red);
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.beat1-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600; line-height: 1.0;
+  margin-bottom: 24px;
+}
+.beat1-title .t-white {
+  display: block;
+  font-size: clamp(40px, 5.4vw, 70px);
+  color: var(--text); letter-spacing: 0.02em;
+  text-shadow: 0 2px 40px rgba(0,0,0,0.85);
+}
+.beat1-title .t-red {
+  display: block;
+  font-size: clamp(40px, 5.4vw, 70px);
+  color: var(--red); letter-spacing: 0.02em;
+  text-shadow: 0 2px 40px rgba(0,0,0,0.85);
+}
+.beat1-sub {
+  font-size: 14px; font-weight: 300;
+  color: var(--faint); line-height: 1.75;
+  max-width: 400px; margin-bottom: 36px;
+  letter-spacing: 0.02em;
+}
+.hero-badges {
+  display: flex; gap: 28px; align-items: center;
+  margin-top: 28px;
+}
+.hero-badge {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.25em; color: var(--faint);
+  text-transform: uppercase;
+}
+.badge-dot {
+  width: 5px; height: 5px;
+  background: var(--red); border-radius: 50%; flex-shrink: 0;
+}
+
+/* Beats 2–6 — secondary overlays */
+.overlay-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600; line-height: 0.90;
+  text-transform: uppercase; letter-spacing: 0.02em;
+  text-shadow: 0 4px 80px rgba(0,0,0,1), 0 1px 12px rgba(0,0,0,1);
+}
+.overlay-sub {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300; margin-top: 20px;
+  letter-spacing: 0.08em; font-size: 13px;
+  color: var(--faint);
+}
+.overlay-sub::before {
+  content: '';
+  display: block;
+  width: 28px; height: 1px;
+  background: var(--red); margin-bottom: 12px;
+}
+
+#beat2 { bottom: 14%; left: 6%; }
+#beat2 .overlay-title { font-size: clamp(34px, 4.6vw, 60px); color: var(--text); }
+#beat2 .overlay-sub { max-width: 400px; line-height: 1.65; }
+
+#beat3 { bottom: 14%; right: 6%; text-align: right; }
+#beat3 .overlay-title { font-size: clamp(34px, 4.6vw, 60px); color: var(--red); }
+#beat3 .overlay-sub { line-height: 1.7; }
+#beat3 .overlay-sub::before { margin-left: auto; }
+
+#beat4 { bottom: 14%; left: 6%; }
+#beat4 .overlay-title { font-size: clamp(34px, 4.6vw, 60px); color: #fff; }
+#beat4 .overlay-title span { color: var(--red); }
+#beat4 .overlay-sub { max-width: 400px; line-height: 1.7; }
+
+/* beat5 & beat6 — centered; JS drives translate(-50%, calc(-50% + Ypx)) */
+#beat5 { top: 50%; left: 50%; text-align: center; }
+#beat5 .overlay-title { font-size: clamp(32px, 4.4vw, 58px); color: var(--text); }
+#beat5 .overlay-title span { color: var(--red); }
+#beat5 .overlay-sub { max-width: 520px; margin: 20px auto 0; line-height: 1.7; }
+#beat5 .overlay-sub::before { margin-left: auto; margin-right: auto; }
+
+#beat6 { top: 50%; left: 50%; text-align: center; }
+#beat6 .overlay-title { font-size: clamp(38px, 5.2vw, 70px); color: var(--red); letter-spacing: 0.04em; }
+
+/* ─────────────────────────────────────── SHARED SECTION STYLES */
+section { position: relative; }
+.container { max-width: 1180px; margin: 0 auto; padding: 0 48px; }
+
+.section-eyebrow {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.42em; color: var(--red);
+  text-transform: uppercase; margin-bottom: 18px;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 4.5vw, 58px);
+  font-weight: 300; line-height: 1.1;
+  color: var(--text); text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.red-rule {
+  width: 48px; height: 2px;
+  background: var(--red); margin: 24px 0 56px;
+}
+.red-rule.center { margin-left: auto; margin-right: auto; }
+
+/* ─────────────────────────────────────── BOOKING */
+#agendar {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 88px 0;
+}
+.booking-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 80px;
+  align-items: start;
+}
+.booking-left { padding-top: 6px; }
+.booking-eyebrow {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.4em; color: var(--red);
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.booking-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 300; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text);
+  line-height: 1.1; margin-bottom: 16px;
+}
+.booking-sub {
+  font-size: 13px; color: var(--faint);
+  line-height: 1.7; margin-bottom: 40px;
+  max-width: 340px;
+}
+.booking-trust { display: flex; flex-direction: column; gap: 14px; }
+.booking-trust-item {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 12px; color: var(--faint); letter-spacing: 0.03em;
+}
+.booking-trust-item::before {
+  content: '';
+  width: 20px; height: 1px;
+  background: var(--red); flex-shrink: 0;
+}
+
+.booking-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.form-field {
+  display: flex; flex-direction: column;
+  padding: 20px 24px 20px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.form-field:nth-child(even) {
+  padding-left: 24px; padding-right: 0;
+  border-left: 1px solid var(--border);
+}
+.form-field.full {
+  grid-column: 1 / -1;
+  padding-left: 0; padding-right: 0;
+  border-left: none;
+}
+.form-field.last { border-bottom: none; }
+.form-label {
+  font-size: 9px; font-weight: 500;
+  letter-spacing: 0.32em; color: var(--red);
+  text-transform: uppercase;
+}
+.form-input {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  width: 100%;
+  outline: none;
+  appearance: none; -webkit-appearance: none;
+}
+.form-input::placeholder { color: var(--faint); }
+select.form-input { cursor: pointer; }
+select.form-input option { background: var(--bg2); color: var(--text); }
+input[type="date"].form-input { color: var(--faint); }
+input[type="date"].form-input::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+.booking-submit {
+  grid-column: 1 / -1;
+  padding-top: 32px;
+  display: flex; align-items: center; gap: 24px;
+}
+.booking-submit .btn-red { padding: 16px 48px; font-size: 12px; }
+.booking-submit-note {
+  font-size: 11px; color: var(--faint); letter-spacing: 0.04em;
+}
+
+/* ─────────────────────────────────────── SERVICES */
+#servicos {
+  padding: 110px 0 90px;
+  background: var(--bg);
+}
+.services-header { text-align: center; margin-bottom: 0; }
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 56px;
+}
+.service-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  transition: border-color 0.25s, transform 0.25s;
+  cursor: default;
+  overflow: hidden;
+}
+.service-card:hover {
+  border-color: var(--red);
+  transform: translateY(-4px);
+}
+.service-card-visual {
+  height: 180px;
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+.service-card-visual::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--red);
+}
+.service-card-visual svg {
+  width: 64px; height: 64px; opacity: 0.9;
+}
+.service-card-body { padding: 28px 24px 32px; }
+.service-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 400;
+  color: var(--text); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 10px;
+}
+.service-card-desc {
+  font-size: 12px; color: var(--faint);
+  line-height: 1.65; margin-bottom: 20px;
+  letter-spacing: 0.02em;
+}
+.service-badge {
+  display: inline-block;
+  background: var(--red-low);
+  border: 1px solid rgba(225,29,42,0.3);
+  color: var(--red);
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  padding: 6px 14px;
+}
+.services-cta { text-align: center; }
+
+/* ─────────────────────────────────────── STATS STRIP */
+#stats {
+  background: var(--bg3);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 72px 0;
+}
+.stats-eyebrow {
+  font-size: 10px; letter-spacing: 0.4em; color: var(--red);
+  text-transform: uppercase; text-align: center; margin-bottom: 52px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.stat-item {
+  text-align: center; padding: 0 32px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.stat-item:last-child { border-right: none; }
+.stat-icon svg { width: 36px; height: 36px; }
+.stat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 60px; font-weight: 300;
+  color: var(--red); line-height: 1;
+}
+.stat-number sup { font-size: 28px; }
+.stat-label {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.3em; color: var(--faint);
+  text-transform: uppercase; line-height: 1.5; max-width: 160px;
+}
+.stat-label strong { color: var(--text); display: block; font-size: 11px; margin-bottom: 4px; }
+
+/* ─────────────────────────────────────── ABOUT / EXPERIENCE */
+#sobre {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 640px;
+}
+.sobre-text-col {
+  background: var(--bg2);
+  padding: 100px 72px 100px 48px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.sobre-visual-col {
+  position: relative; overflow: hidden; background: #050505;
+}
+.sobre-visual-col video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; opacity: 0.6;
+}
+.sobre-visual-col::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to right, rgba(17,17,17,0.5) 0%, transparent 60%);
+  pointer-events: none;
+}
+.sobre-text-col .section-title { margin-bottom: 0; }
+.sobre-body {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 17px; line-height: 1.85;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 36px; max-width: 500px;
+}
+
+/* ─────────────────────────────────────── TESTIMONIALS */
+#depoimentos {
+  padding: 110px 0;
+  background: var(--bg);
+}
+.dep-header { text-align: center; margin-bottom: 0; }
+.dep-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.dep-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 40px 36px;
+  transition: border-color 0.25s;
+}
+.dep-card:hover { border-color: rgba(225,29,42,0.35); }
+.dep-stars {
+  color: var(--red); font-size: 16px;
+  letter-spacing: 3px; margin-bottom: 22px;
+}
+.dep-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-weight: 300;
+  font-size: 18px; line-height: 1.65;
+  color: var(--text); margin-bottom: 28px;
+}
+.dep-sep {
+  width: 28px; height: 1px;
+  background: var(--red); margin-bottom: 16px;
+}
+.dep-name {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.25em; color: var(--faint);
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────── DIFERENCIAIS */
+#diferenciais {
+  padding: 110px 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+.diff-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 60px;
+  align-items: start;
+}
+.diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.diff-item {
+  padding: 32px 28px;
+  border: 1px solid var(--border);
+  margin: -1px 0 0 -1px;
+  transition: border-color 0.25s, background 0.25s;
+}
+.diff-item:hover {
+  border-color: rgba(225,29,42,0.35);
+  background: rgba(225,29,42,0.04);
+}
+.diff-icon { margin-bottom: 18px; }
+.diff-icon svg { width: 28px; height: 28px; }
+.diff-title-item {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 400;
+  color: var(--text); text-transform: uppercase;
+  letter-spacing: 0.04em; margin-bottom: 10px;
+}
+.diff-desc { font-size: 12px; color: var(--faint); line-height: 1.65; }
+
+/* VIP-style contact box */
+.diff-cta-box {
+  background: var(--red);
+  padding: 48px 40px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.diff-cta-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-weight: 300;
+  color: #fff; text-transform: uppercase;
+  letter-spacing: 0.04em; line-height: 1.15;
+}
+.diff-cta-text {
+  font-size: 13px; font-weight: 300;
+  color: rgba(255,255,255,0.8); line-height: 1.65;
+}
+.btn-white {
+  display: inline-block;
+  background: #fff;
+  color: var(--red);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  text-decoration: none;
+  padding: 14px 24px;
+  border: none; cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-start;
+}
+.btn-white:hover { background: rgba(255,255,255,0.88); }
+
+/* ─────────────────────────────────────── CONTACT */
+#contato {
+  padding: 110px 0;
+  background: var(--bg);
+}
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1.1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+/* ── Map column ── */
+.contact-map-col { padding-top: 8px; }
+.contact-map-label {
+  font-size: 9px; font-weight: 500;
+  letter-spacing: 0.35em; color: var(--red);
+  text-transform: uppercase; margin-bottom: 14px;
+}
+#contact-map {
+  width: 100%; height: 380px;
+  border-radius: 3px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.contact-map-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 14px;
+  font-size: 11px; letter-spacing: 0.12em;
+  color: var(--faint); text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.contact-map-link:hover { color: var(--red); }
+.contact-map-link svg { flex-shrink: 0; }
+
+/* Leaflet popup dark theme */
+.leaflet-popup-content-wrapper {
+  background: #181818 !important;
+  color: rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(225,29,42,0.30) !important;
+  border-radius: 3px !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.85) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.leaflet-popup-tip-container { display: none; }
+.leaflet-popup-close-button { color: rgba(255,255,255,0.45) !important; }
+
+@keyframes mapPulse {
+  0%   { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+.contact-left { padding-top: 8px; }
+.contact-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 300; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text);
+  line-height: 1.1; margin-bottom: 16px;
+}
+.contact-sub {
+  font-size: 14px; color: var(--faint);
+  line-height: 1.75; margin-bottom: 32px;
+}
+.contact-promises {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.contact-promise {
+  padding: 18px 16px;
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--red);
+  background: rgba(255,255,255,0.02);
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+.contact-promise:hover { background: rgba(255,255,255,0.04); }
+.contact-promise-icon {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--red-low);
+  border-radius: 50%;
+  margin-bottom: 12px;
+}
+.contact-promise-title {
+  font-size: 12px; font-weight: 600;
+  color: var(--text); letter-spacing: 0.02em;
+  margin-bottom: 5px;
+}
+.contact-promise-desc {
+  font-size: 11px; color: var(--faint);
+  line-height: 1.6;
+}
+.contact-wa-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #22c55e;
+  color: #fff; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  text-decoration: none; padding: 16px 28px;
+  border-radius: 2px;
+  transition: background 0.2s, transform 0.15s;
+}
+.contact-wa-btn:hover { background: #16a34a; transform: translateY(-1px); }
+
+.contact-form { display: flex; flex-direction: column; gap: 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+textarea.form-input {
+  resize: vertical; min-height: 120px;
+  font-family: 'Inter', sans-serif;
+}
+.contact-form .btn-red { align-self: flex-start; padding: 15px 40px; font-size: 12px; }
+
+/* ─────────────────────────────────────── FOOTER */
+footer {
+  background: #050505;
+  border-top: 1px solid var(--border);
+  padding: 64px 0 40px;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 48px; align-items: start;
+  margin-bottom: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--border);
+}
+.footer-brand .logo-main { font-size: 20px; margin-bottom: 8px; }
+.footer-brand p {
+  font-size: 12px; color: var(--faint);
+  line-height: 1.6; max-width: 240px; margin-top: 12px;
+}
+.footer-nav-list { list-style: none; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.footer-nav-list a {
+  font-size: 11px; letter-spacing: 0.2em;
+  color: var(--faint); text-decoration: none;
+  text-transform: uppercase; transition: color 0.2s;
+}
+.footer-nav-list a:hover { color: var(--red); }
+.footer-contact-list { list-style: none; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+.footer-contact-list li { font-size: 12px; color: var(--faint); }
+.footer-contact-list a { color: var(--faint); text-decoration: none; transition: color 0.2s; }
+.footer-contact-list a:hover { color: var(--red); }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-copy { font-size: 11px; color: rgba(255,255,255,0.18); letter-spacing: 0.04em; }
+.footer-badge {
+  font-size: 10px; letter-spacing: 0.25em;
+  color: var(--red); text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────── RESPONSIVE */
+@media (max-width: 1100px) {
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .diff-layout { grid-template-columns: 1fr; }
+  .diff-cta-box { max-width: 480px; }
+}
+/* ─────────────────────────────────────── MOBILE DRAWER */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px; height: 36px;
+  background: none; border: none;
+  cursor: pointer; padding: 4px;
+  flex-shrink: 0;
+}
+.nav-toggle span {
+  display: block; width: 22px; height: 1.5px;
+  background: var(--text); border-radius: 1px;
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1),
+              opacity   0.32s ease;
+  transform-origin: center;
+}
+.nav-toggle.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+.drawer-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(3px);
+  z-index: 998;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.32s ease;
+}
+.drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+.nav-drawer {
+  position: fixed;
+  top: 0; right: 0;
+  width: 220px; height: 100%;
+  background: #0f0f0f;
+  border-left: 1px solid var(--border);
+  z-index: 999;
+  display: flex; flex-direction: column;
+  padding: 0 24px 36px;
+  transform: translateX(100%);
+  transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+}
+.nav-drawer.open { transform: translateX(0); }
+
+.drawer-head {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+.drawer-logo { height: 28px; width: auto; }
+.drawer-close {
+  background: none; border: none;
+  color: var(--faint); cursor: pointer;
+  padding: 4px; line-height: 0;
+  transition: color 0.2s;
+}
+.drawer-close:hover { color: var(--text); }
+
+.drawer-nav {
+  display: flex; flex-direction: column;
+  gap: 0; flex: 1;
+}
+.drawer-nav-link {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--faint); text-decoration: none;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s, padding-left 0.2s;
+}
+.drawer-nav-link:hover, .drawer-nav-link.active {
+  color: var(--text); padding-left: 4px;
+}
+.drawer-nav-link.active { color: var(--red); }
+
+.drawer-cta {
+  margin-top: 28px;
+  display: block; text-align: center;
+  background: var(--red); color: #fff;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  text-decoration: none; padding: 14px;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+.drawer-cta:hover { background: #c81825; }
+
+@media (max-width: 900px) {
+  nav { display: none; }
+  header .btn-red { display: none; }
+  .nav-toggle { display: flex; }
+  header { padding: 0 24px; }
+  .container { padding: 0 24px; }
+  .booking-layout { grid-template-columns: 1fr; gap: 48px; }
+  .booking-form { grid-template-columns: 1fr; }
+  .form-field:nth-child(even) { padding-left: 0; border-left: none; }
+  #sobre { grid-template-columns: 1fr; }
+  .sobre-visual-col { height: 340px; }
+  .contact-layout { grid-template-columns: 1fr; gap: 48px; }
+  #contact-map { height: 280px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 32px; }
+  .stat-item:last-child, .stat-item:nth-child(even) { border-bottom: none; }
+  .dep-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; }
+  .footer-contact-list { align-items: flex-start; }
+  #beat1 { max-width: 80%; left: 5%; }
+  .booking-inner { flex-direction: column; gap: 28px; }
+  .booking-form { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .services-grid { grid-template-columns: 1fr; }
+  .diff-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .booking-form { grid-template-columns: 1fr; }
+  .hero-badges { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .beat1-title .t-white, .beat1-title .t-red { font-size: 30px; }
+  #beat6 { white-space: normal; text-align: center; }
+  .sobre-text-col { padding: 60px 24px; }
+  .footer-bottom { flex-direction: column; gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <img class="ld-logo" src="/assets/Speed.png" alt="Speed Car">
+  <p class="ld-text">Preparando experiência</p>
+  <div class="ld-bar-wrap"><div class="ld-bar" id="ld-bar"></div></div>
+</div>
+
+<!-- SCROLL PROGRESS BAR -->
+<div id="scroll-progress"><div id="scroll-fill"></div></div>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header id="main-header">
+  <a class="logo-wrap" href="#inicio">
+    <img class="logo-img" src="/assets/Speed.png" alt="Speed Car">
+  </a>
+  <nav>
+    <a class="nav-link active" href="#inicio">Início</a>
+    <a class="nav-link" href="#servicos">Serviços</a>
+    <a class="nav-link" href="#sobre">Sobre</a>
+    <a class="nav-link" href="#contato">Contato</a>
+  </nav>
+  <a class="btn-red" href="https://wa.me/5511968644511" target="_blank" rel="noopener">AGENDAR</a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- ══════════════════ MOBILE DRAWER ══════════════════ -->
+<div class="drawer-overlay" id="drawer-overlay"></div>
+<aside class="nav-drawer" id="nav-drawer" aria-label="Menu mobile">
+  <div class="drawer-head">
+    <img class="drawer-logo" src="/assets/Speed.png" alt="Speed Car">
+    <button class="drawer-close" id="drawer-close" aria-label="Fechar menu">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M4 4L16 16M16 4L4 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <nav class="drawer-nav">
+    <a class="drawer-nav-link active" href="#inicio">Início</a>
+    <a class="drawer-nav-link" href="#servicos">Serviços</a>
+    <a class="drawer-nav-link" href="#sobre">Sobre</a>
+    <a class="drawer-nav-link" href="#contato">Contato</a>
+  </nav>
+  <a class="drawer-cta" href="https://wa.me/5511968644511" target="_blank" rel="noopener">Agendar pelo WhatsApp</a>
+</aside>
+
+<!-- ══════════════════ HERO (scroll-driven video) ══════════════════ -->
+<section id="inicio" aria-label="Hero">
+  <div id="hero-sticky">
+    <canvas id="hero-canvas"></canvas>
+    <!-- display video: scroll-driven seek only, never plays freely -->
+    <video id="hero-video" src="/assets/speedcar-hero.mp4" preload="auto" muted playsinline webkit-playsinline></video>
+    <!-- extraction video: hidden clone used only for background frame capture -->
+    <video id="hero-extract" src="/assets/speedcar-hero.mp4" preload="auto" muted playsinline style="display:none" aria-hidden="true"></video>
+
+    <!-- Beat 1: main hero copy -->
+    <div class="overlay" id="beat1">
+      <div class="beat1-eyebrow">Velocidade · Confiança · Excelência</div>
+      <h1 class="beat1-title">
+        <span class="t-white">PRECISÃO QUE<br>VOCÊ SENTE.</span>
+        <span class="t-red">CONFIANÇA<br>QUE FICA.</span>
+      </h1>
+      <p class="beat1-sub">Tecnologia avançada, diagnóstico preciso e manutenção de alto desempenho para quem exige o melhor do seu veículo.</p>
+      <div class="hero-badges">
+        <div class="hero-badge"><span class="badge-dot"></span><span>Oficina Premium</span></div>
+        <div class="hero-badge"><span class="badge-dot"></span><span>Tecnologia de Ponta</span></div>
+        <div class="hero-badge"><span class="badge-dot"></span><span>Garantia Real</span></div>
+      </div>
+    </div>
+
+    <!-- Beat 2 -->
+    <div class="overlay" id="beat2">
+      <div class="overlay-title">DIAGNÓSTICO<br>DE PRECISÃO</div>
+      <div class="overlay-sub">Equipamentos de última geração para identificar<br>qualquer falha antes que ela vire problema.</div>
+    </div>
+
+    <!-- Beat 3 -->
+    <div class="overlay" id="beat3">
+      <div class="overlay-title">AUTO<br>MECÂNICA</div>
+      <div class="overlay-sub">Motor · Câmbio · Suspensão · Troca de Óleo</div>
+    </div>
+
+    <!-- Beat 4 -->
+    <div class="overlay" id="beat4">
+      <div class="overlay-title">AUTO<br><span>ELÉTRICA</span></div>
+      <div class="overlay-sub">Scanner Automotivo · Injeção Eletrônica · Bateria</div>
+    </div>
+
+    <!-- Beat 5 -->
+    <div class="overlay" id="beat5">
+      <div class="overlay-title"><span>10+ ANOS</span><br>DE EXCELÊNCIA</div>
+      <div class="overlay-sub">Honestidade absoluta. Atendimento humanizado. Garantia real.</div>
+    </div>
+
+    <!-- Beat 6 -->
+    <div class="overlay" id="beat6">
+      <div class="overlay-title">SEU CARRO<br>SEMPRE NOVO</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ BOOKING ══════════════════ -->
+<div id="agendar">
+  <div class="container">
+    <div class="booking-layout">
+
+      <!-- Left: copy + trust -->
+      <div class="booking-left">
+        <div class="booking-eyebrow">Agende Online</div>
+        <h2 class="booking-title">Agende Seu<br>Serviço</h2>
+        <p class="booking-sub">Preencha o formulário ao lado e nossa equipe entrará em contato para confirmar horário e detalhes.</p>
+        <div class="booking-trust">
+          <div class="booking-trust-item">Resposta em até 2 horas</div>
+          <div class="booking-trust-item">Orçamento 100% gratuito</div>
+          <div class="booking-trust-item">Sem compromisso de contratação</div>
+          <div class="booking-trust-item">Atendimento via WhatsApp</div>
+        </div>
+      </div>
+
+      <!-- Right: form -->
+      <form class="booking-form" id="booking-form" novalidate>
+
+        <div class="form-field">
+          <label class="form-label" for="bname">Nome completo</label>
+          <input class="form-input" id="bname" type="text" placeholder="Seu nome">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="tel">Telefone / WhatsApp</label>
+          <input class="form-input" id="tel" type="tel" placeholder="(11) 9 0000-0000">
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="svc">Serviço desejado</label>
+          <select class="form-input" id="svc">
+            <option value="">Selecione o serviço...</option>
+            <option>Auto Mecânica Geral</option>
+            <option>Auto Elétrica</option>
+            <option>Motor — Revisão / Retífica</option>
+            <option>Câmbio Automático ou Manual</option>
+            <option>Suspensão e Alinhamento</option>
+            <option>Troca de Óleo e Filtros</option>
+            <option>Scanner Automotivo</option>
+            <option>Injeção Eletrônica</option>
+            <option>Bateria</option>
+            <option>Ar-Condicionado</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="veh">Veículo e modelo</label>
+          <input class="form-input" id="veh" type="text" placeholder="Ex: Toyota Corolla 2020">
+        </div>
+
+        <div class="form-field full">
+          <label class="form-label" for="dt">Data preferida para atendimento</label>
+          <input class="form-input" id="dt" type="date">
+        </div>
+
+        <div class="form-field full last">
+          <label class="form-label" for="bobs">Descreva o problema (opcional)</label>
+          <input class="form-input" id="bobs" type="text" placeholder="Ex: barulho na suspensão ao frear, luz de check acesa...">
+        </div>
+
+        <div class="booking-submit">
+          <button type="submit" class="btn-red">SOLICITAR ORÇAMENTO</button>
+          <span class="booking-submit-note">Você será redirecionado ao WhatsApp</span>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ SERVIÇOS ══════════════════ -->
+<section id="servicos">
+  <div class="container">
+    <div class="services-header">
+      <div class="section-eyebrow">Nossas Especialidades</div>
+      <h2 class="section-title">O Melhor Para o Seu Carro</h2>
+      <div class="red-rule center"></div>
+    </div>
+    <div class="services-grid">
+
+      <!-- Motor -->
+      <div class="service-card">
+        <div class="service-card-visual">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="18" y="28" width="44" height="28" rx="2" stroke="#E11D2A" stroke-width="1.8"/>
+            <rect x="8"  y="36" width="12" height="12" rx="1" stroke="#E11D2A" stroke-width="1.8"/>
+            <rect x="60" y="36" width="12" height="12" rx="1" stroke="#E11D2A" stroke-width="1.8"/>
+            <line x1="28" y1="28" x2="28" y2="20" stroke="#E11D2A" stroke-width="1.8"/>
+            <line x1="40" y1="28" x2="40" y2="20" stroke="#E11D2A" stroke-width="1.8"/>
+            <line x1="52" y1="28" x2="52" y2="20" stroke="#E11D2A" stroke-width="1.8"/>
+            <circle cx="40" cy="42" r="6" stroke="#E11D2A" stroke-width="1.8"/>
+            <circle cx="40" cy="42" r="2" fill="#E11D2A"/>
+          </svg>
+        </div>
+        <div class="service-card-body">
+          <div class="service-card-name">Motor</div>
+          <p class="service-card-desc">Retífica, troca de válvulas, revisão completa e manutenção preventiva para motor durar muito mais.</p>
+          <span class="service-badge">Orçamento Rápido</span>
+        </div>
+      </div>
+
+      <!-- Câmbio -->
+      <div class="service-card">
+        <div class="service-card-visual">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="22" cy="40" r="12" stroke="#E11D2A" stroke-width="1.8"/>
+            <circle cx="58" cy="40" r="12" stroke="#E11D2A" stroke-width="1.8"/>
+            <line x1="34" y1="40" x2="46" y2="40" stroke="#E11D2A" stroke-width="1.8"/>
+            <circle cx="22" cy="40" r="4" fill="#E11D2A" opacity="0.7"/>
+            <circle cx="58" cy="40" r="4" fill="#E11D2A" opacity="0.7"/>
+            <line x1="22" y1="28" x2="22" y2="22" stroke="#E11D2A" stroke-width="1.5" stroke-dasharray="3"/>
+            <line x1="58" y1="28" x2="58" y2="22" stroke="#E11D2A" stroke-width="1.5" stroke-dasharray="3"/>
+          </svg>
+        </div>
+        <div class="service-card-body">
+          <div class="service-card-name">Câmbio</div>
+          <p class="service-card-desc">Diagnóstico e reparo completo de câmbio manual e automático. Segurança e suavidade em cada marcha.</p>
+          <span class="service-badge">Orçamento Rápido</span>
+        </div>
+      </div>
+
+      <!-- Scanner -->
+      <div class="service-card">
+        <div class="service-card-visual">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="12" y="18" width="56" height="36" rx="2" stroke="#E11D2A" stroke-width="1.8"/>
+            <line x1="12" y1="30" x2="68" y2="30" stroke="#E11D2A" stroke-width="1" stroke-dasharray="4 2" opacity="0.4"/>
+            <polyline points="18,44 28,28 38,38 50,24 62,36" stroke="#E11D2A" stroke-width="1.8" fill="none"/>
+            <rect x="32" y="54" width="16" height="6" rx="1" stroke="#E11D2A" stroke-width="1.5"/>
+            <line x1="24" y1="60" x2="56" y2="60" stroke="#E11D2A" stroke-width="1.8"/>
+          </svg>
+        </div>
+        <div class="service-card-body">
+          <div class="service-card-name">Scanner Automotivo</div>
+          <p class="service-card-desc">Diagnóstico computadorizado de falhas eletrônicas com tecnologia de última geração.</p>
+          <span class="service-badge">Orçamento Rápido</span>
+        </div>
+      </div>
+
+      <!-- Injeção -->
+      <div class="service-card">
+        <div class="service-card-visual">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="32" y="10" width="16" height="38" rx="3" stroke="#E11D2A" stroke-width="1.8"/>
+            <rect x="26" y="18" width="28" height="4" rx="1" fill="#E11D2A" opacity="0.5"/>
+            <rect x="26" y="26" width="28" height="4" rx="1" fill="#E11D2A" opacity="0.3"/>
+            <path d="M32 48 L26 66" stroke="#E11D2A" stroke-width="1.8"/>
+            <path d="M48 48 L54 66" stroke="#E11D2A" stroke-width="1.8"/>
+            <line x1="22" y1="66" x2="58" y2="66" stroke="#E11D2A" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <circle cx="40" cy="70" r="2" fill="#E11D2A"/>
+            <circle cx="30" cy="70" r="2" fill="#E11D2A" opacity="0.5"/>
+            <circle cx="50" cy="70" r="2" fill="#E11D2A" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="service-card-body">
+          <div class="service-card-name">Injeção Eletrônica</div>
+          <p class="service-card-desc">Limpeza ultrassônica de bicos injetores e ajuste de sensores para máxima eficiência e economia.</p>
+          <span class="service-badge">Orçamento Rápido</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="services-cta">
+      <a class="btn-outline" href="https://wa.me/5511968644511" target="_blank" rel="noopener">VER TODOS OS SERVIÇOS</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ STATS ══════════════════ -->
+<div id="stats">
+  <div class="container">
+    <div class="stats-eyebrow">Performance &amp; Excelência</div>
+    <div class="stats-grid">
+
+      <div class="stat-item">
+        <div class="stat-number">10<sup>+</sup></div>
+        <div class="stat-label"><strong>Anos de Excelência</strong>Experiência comprovada no mercado automotivo de Itu</div>
+      </div>
+
+      <div class="stat-item">
+        <div class="stat-icon">
+          <svg viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="15" stroke="#E11D2A" stroke-width="1.5"/>
+            <polyline points="10,18 15,24 26,12" stroke="#E11D2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-label"><strong>100% Transparência</strong>Orçamento detalhado antes de qualquer serviço iniciar</div>
+      </div>
+
+      <div class="stat-item">
+        <div class="stat-icon">
+          <svg viewBox="0 0 36 36" fill="none">
+            <rect x="6" y="10" width="24" height="18" rx="2" stroke="#E11D2A" stroke-width="1.5"/>
+            <polyline points="11,19 16,15 20,20 25,14" stroke="#E11D2A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-label"><strong>Peças Originais</strong>Durabilidade garantida com componentes de primeira linha</div>
+      </div>
+
+      <div class="stat-item">
+        <div class="stat-icon">
+          <svg viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="14" r="7" stroke="#E11D2A" stroke-width="1.5"/>
+            <path d="M4 30 C4 24 10 20 18 20 C26 20 32 24 32 30" stroke="#E11D2A" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="stat-label"><strong>Atendimento Ágil</strong>Scanner de última geração para diagnóstico assertivo</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ SOBRE ══════════════════ -->
+<section id="sobre">
+  <div class="sobre-text-col">
+    <div class="section-eyebrow">Além do Conserto</div>
+    <h2 class="section-title" style="margin-bottom:0">UMA EXPERIÊNCIA<br>SOB MEDIDA<br>PARA VOCÊ</h2>
+    <div class="red-rule"></div>
+    <p class="sobre-body">"Há mais de uma década entregando excelência em serviços automotivos em Itu, unindo conhecimento técnico avançado, honestidade absoluta e atendimento humanizado. Não somos apenas uma oficina — somos parceiros na manutenção do seu bem."</p>
+    <a class="btn-outline" href="https://wa.me/5511968644511" target="_blank" rel="noopener">SAIBA MAIS</a>
+  </div>
+  <div class="sobre-visual-col">
+    <video autoplay muted loop playsinline webkit-playsinline>
+      <source src="/assets/speedcar-hero.mp4" type="video/mp4">
+    </video>
+  </div>
+</section>
+
+<!-- ══════════════════ DEPOIMENTOS ══════════════════ -->
+<section id="depoimentos">
+  <div class="container">
+    <div class="dep-header">
+      <div class="section-eyebrow">Clientes Satisfeitos</div>
+      <h2 class="section-title">O Que Nossos Clientes Dizem</h2>
+      <div class="red-rule center"></div>
+    </div>
+    <div class="dep-grid">
+      <div class="dep-card">
+        <div class="dep-stars">★★★★★</div>
+        <p class="dep-text">"Atendimento honesto e serviço impecável. Fui bem recebido, recebi o orçamento detalhado e meu carro ficou perfeito."</p>
+        <div class="dep-sep"></div>
+        <div class="dep-name">Carlos M. — Itu, SP</div>
+      </div>
+      <div class="dep-card">
+        <div class="dep-stars">★★★★★</div>
+        <p class="dep-text">"Diagnóstico preciso e preço justo. Outras oficinas tentaram me cobrar o dobro por um problema que eles resolveram rápido."</p>
+        <div class="dep-sep"></div>
+        <div class="dep-name">Ana S. — Itu, SP</div>
+      </div>
+      <div class="dep-card">
+        <div class="dep-stars">★★★★★</div>
+        <p class="dep-text">"Rápido, transparente e com garantia real. Levei meu carro sem hora marcada e mesmo assim fui atendido na hora."</p>
+        <div class="dep-sep"></div>
+        <div class="dep-name">Ricardo L. — Salto, SP</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ DIFERENCIAIS ══════════════════ -->
+<section id="diferenciais">
+  <div class="container">
+    <div class="section-eyebrow">Por que escolher a Speed Car</div>
+    <h2 class="section-title" style="margin-bottom:0">Por Que a Speed Car<br>É Diferente?</h2>
+    <div class="red-rule"></div>
+    <div class="diff-layout">
+      <div class="diff-grid">
+
+        <div class="diff-item">
+          <div class="diff-icon">
+            <svg viewBox="0 0 28 28" fill="none"><path d="M14 3L17 10H24L18.5 14.5L21 22L14 17.5L7 22L9.5 14.5L4 10H11L14 3Z" stroke="#E11D2A" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="diff-title-item">Qualidade Premium</div>
+          <p class="diff-desc">Peças originais e de primeira linha. Sem atalhos que comprometam a segurança do seu veículo.</p>
+        </div>
+
+        <div class="diff-item">
+          <div class="diff-icon">
+            <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" stroke="#E11D2A" stroke-width="1.5"/><polyline points="14,8 14,14 18,17" stroke="#E11D2A" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="diff-title-item">Agilidade Real</div>
+          <p class="diff-desc">Diagnóstico rápido e execução eficiente. Respeitamos seu tempo tanto quanto seu veículo.</p>
+        </div>
+
+        <div class="diff-item">
+          <div class="diff-icon">
+            <svg viewBox="0 0 28 28" fill="none"><rect x="4" y="6" width="20" height="14" rx="2" stroke="#E11D2A" stroke-width="1.5"/><polyline points="7,16 11,10 14,13 18,8 21,12" stroke="#E11D2A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="diff-title-item">Tecnologia de Ponta</div>
+          <p class="diff-desc">Scanner automotivo avançado para diagnóstico eletrônico preciso de qualquer problema.</p>
+        </div>
+
+        <div class="diff-item">
+          <div class="diff-icon">
+            <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" stroke="#E11D2A" stroke-width="1.5"/><polyline points="8,14 12,18 20,10" stroke="#E11D2A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="diff-title-item">Transparência Total</div>
+          <p class="diff-desc">Orçamento claro, sem surpresas. Você aprova cada etapa antes que qualquer serviço comece.</p>
+        </div>
+
+      </div>
+
+      <!-- CTA Box -->
+      <div class="diff-cta-box">
+        <div class="diff-cta-title">Fale com a<br>Speed Car</div>
+        <p class="diff-cta-text">Tire suas dúvidas, solicite um orçamento ou agende sua visita diretamente pelo WhatsApp. Nossa equipe responde com agilidade.</p>
+        <a class="btn-white" href="https://wa.me/5511968644511" target="_blank" rel="noopener">CHAMAR NO WHATSAPP</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ CONTATO ══════════════════ -->
+<section id="contato">
+  <div class="container">
+    <div class="contact-layout">
+      <div class="contact-left">
+        <div class="section-eyebrow">Fale Conosco</div>
+        <h2 class="contact-title">Seu Veículo<br>em Boas Mãos.</h2>
+        <p class="contact-sub">Da elétrica ao motor, entregamos diagnóstico preciso, peças originais e serviço com total transparência. Conte com quem entende.</p>
+
+        <div class="contact-promises">
+
+          <div class="contact-promise">
+            <div class="contact-promise-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M13.5 3L6 11.5L2.5 8" stroke="#E11D2A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="contact-promise-title">Orçamento Gratuito</div>
+            <div class="contact-promise-desc">Você aprova cada etapa antes de qualquer serviço começar.</div>
+          </div>
+
+          <div class="contact-promise">
+            <div class="contact-promise-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6" stroke="#E11D2A" stroke-width="1.4"/>
+                <polyline points="8,4 8,8 10.5,10" stroke="#E11D2A" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="contact-promise-title">Resposta em até 1h</div>
+            <div class="contact-promise-desc">Atendimento ágil via WhatsApp, sem enrolação.</div>
+          </div>
+
+          <div class="contact-promise">
+            <div class="contact-promise-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 14L5.5 10.5M10 2L14 6L10.5 9.5C9.5 10.5 8 10.5 7 9.5L6.5 9C5.5 8 5.5 6.5 6.5 5.5L10 2Z" stroke="#E11D2A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="contact-promise-title">+15 Anos de Expertise</div>
+            <div class="contact-promise-desc">Mecânica e elétrica com experiência multimarca.</div>
+          </div>
+
+          <div class="contact-promise">
+            <div class="contact-promise-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="4" width="12" height="8" rx="1.5" stroke="#E11D2A" stroke-width="1.4"/>
+                <polyline points="5,8 7,10 11,6" stroke="#E11D2A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="contact-promise-title">Scanner Multimarcas</div>
+            <div class="contact-promise-desc">Diagnóstico eletrônico preciso para qualquer veículo.</div>
+          </div>
+
+        </div>
+
+        <a class="contact-wa-btn" href="https://wa.me/5511968644511" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1.5C4.86 1.5 1.5 4.86 1.5 9C1.5 10.35 1.86 11.64 2.49 12.75L1.5 16.5L5.37 15.525C6.45 16.11 7.68 16.5 9 16.5C13.14 16.5 16.5 13.14 16.5 9C16.5 4.86 13.14 1.5 9 1.5ZM12.75 11.625C12.6 12.045 11.88 12.42 11.535 12.465C11.19 12.51 10.77 12.525 10.305 12.375C10.02 12.285 9.645 12.15 9.165 11.94C7.2 11.085 5.955 9.105 5.86 8.97C5.76 8.835 5.1 7.965 5.1 7.065C5.1 6.165 5.565 5.73 5.73 5.55C5.895 5.37 6.09 5.325 6.21 5.325C6.33 5.325 6.45 5.325 6.555 5.33C6.675 5.34 6.825 5.295 6.975 5.655L7.545 7.065C7.605 7.2 7.65 7.35 7.56 7.485C7.47 7.62 7.425 7.71 7.305 7.845C7.185 7.98 7.05 8.145 6.945 8.25C6.825 8.37 6.705 8.505 6.84 8.73C6.975 8.955 7.44 9.705 8.115 10.305C8.985 11.085 9.72 11.325 9.945 11.445C10.17 11.565 10.305 11.55 10.44 11.4C10.575 11.25 11.025 10.725 11.175 10.5C11.325 10.275 11.475 10.305 11.685 10.38L13.065 11.04C13.275 11.145 13.41 11.19 13.47 11.28C13.53 11.37 13.53 11.79 13.365 12.24L12.75 11.625Z" fill="white"/>
+          </svg>
+          Falar no WhatsApp Agora
+        </a>
+      </div>
+
+      <form class="contact-form" id="contact-form" novalidate>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="cname">Nome</label>
+            <input class="form-input" id="cname" type="text" placeholder="Seu nome completo">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="cemail">E-mail</label>
+            <input class="form-input" id="cemail" type="email" placeholder="seu@email.com">
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="cphone">Telefone</label>
+          <input class="form-input" id="cphone" type="tel" placeholder="(11) 9 0000-0000">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="cmsg">Mensagem</label>
+          <textarea class="form-input" id="cmsg" placeholder="Como podemos te ajudar?"></textarea>
+        </div>
+        <button type="submit" class="btn-red">ENVIAR MENSAGEM</button>
+      </form>
+
+      <!-- Map column -->
+      <div class="contact-map-col">
+        <div class="contact-map-label">Nossa Localização</div>
+        <div id="contact-map"></div>
+        <a class="contact-map-link" href="https://maps.app.goo.gl/aWZmc8F7eA1xB7qb8" target="_blank" rel="noopener">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1C3.57 1 2 2.57 2 4.5C2 7.13 5.5 10 5.5 10C5.5 10 9 7.13 9 4.5C9 2.57 7.43 1 5.5 1ZM5.5 5.75C4.81 5.75 4.25 5.19 4.25 4.5C4.25 3.81 4.81 3.25 5.5 3.25C6.19 3.25 6.75 3.81 6.75 4.5C6.75 5.19 6.19 5.75 5.5 5.75Z" fill="currentColor"/></svg>
+          Abrir no Google Maps
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="/assets/Speed.png" alt="Speed Car" style="height:52px;width:auto;object-fit:contain;display:block;margin-bottom:12px;">
+        <p>Sua oficina de confiança em Itu, SP. Mais de uma década cuidando do seu veículo com honestidade e tecnologia.</p>
+      </div>
+      <ul class="footer-nav-list">
+        <li><a href="#inicio">Início</a></li>
+        <li><a href="#servicos">Serviços</a></li>
+        <li><a href="#diferenciais">Diferenciais</a></li>
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#contato">Contato</a></li>
+      </ul>
+      <ul class="footer-contact-list">
+        <li><a href="https://wa.me/5511968644511" target="_blank" rel="noopener">(11) 96864-4511</a></li>
+        <li><a href="https://maps.app.goo.gl/aWZmc8F7eA1xB7qb8" target="_blank" rel="noopener">Av. da Paz Universal, 15 – Itu, SP</a></li>
+        <li>Seg–Sex 08:00–18:00</li>
+        <li>Sáb 08:00–13:00</li>
+      </ul>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 Speed Car — Auto Mecânica e Elétrica. Todos os direitos reservados.</span>
+      <span class="footer-badge">Itu · SP · Brasil</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const heroVideo   = document.getElementById('hero-video');
+  const heroExtract = document.getElementById('hero-extract');
+  const heroCanvas  = document.getElementById('hero-canvas');
+  const heroCtx     = heroCanvas.getContext('2d');
+  const header      = document.getElementById('main-header');
+
+  /* Ensure display video never plays freely — only scroll moves it */
+  heroVideo.pause();
+  heroVideo.addEventListener('play', function() { heroVideo.pause(); });
+
+  /* ── HERO ENGINE CONFIG ────────────────────────────────────────
+     Responsive frame size + fps. Degrades gracefully on slow
+     connections (navigator.connection) or small screens. ── */
+  var IS_MOBILE = window.innerWidth < 768;
+  var FRAME_W   = IS_MOBILE ? 854  : 1280;
+  var FRAME_H   = IS_MOBILE ? 480  : 720;
+  var FPS       = 4; /* 4 fps × ~10 s ≈ 40 frames ≈ 1.5 s extraction */
+
+  /* ── State ── */
+  var frames         = [];
+  var totalFrames    = 0;
+  var latestProgress = 0;
+  var canvasReady    = false;
+  var currentFrameF  = 0;   /* float — lerp source */
+  var targetFrameF   = 0;   /* float — lerp destination */
+
+  /* ── Canvas ── */
+  function resizeCanvas() {
+    heroCanvas.width  = Math.round(window.innerWidth);
+    heroCanvas.height = Math.round(window.innerHeight);
+    if (canvasReady && frames.length) renderCanvas();
+  }
+  resizeCanvas();
+  window.addEventListener('resize', function() {
+    resizeCanvas();
+    ScrollTrigger.refresh();
+  });
+
+  /* Render whichever frame currentFrameF points at */
+  function renderCanvas() {
+    var idx = Math.max(0, Math.min(frames.length - 1, Math.round(currentFrameF)));
+    var bmp = frames[idx];
+    if (!bmp) return;
+    var cw = heroCanvas.width, ch = heroCanvas.height;
+    var bw = bmp.width  || FRAME_W;
+    var bh = bmp.height || FRAME_H;
+    var sc = Math.max(cw / bw, ch / bh);
+    heroCtx.drawImage(bmp, (cw - bw * sc) / 2, (ch - bh * sc) / 2, bw * sc, bh * sc);
+  }
+
+  /* Continuous lerp loop — starts after crossfade, runs forever */
+  function startCanvasLoop() {
+    var LERP = 0.18;
+    (function loop() {
+      if (!canvasReady) return;
+      requestAnimationFrame(loop);
+      var diff = targetFrameF - currentFrameF;
+      currentFrameF = Math.abs(diff) < 0.08 ? targetFrameF : currentFrameF + diff * LERP;
+      renderCanvas();
+    }());
+  }
+
+  /* ── Beat definitions
+        tf(ty) builds the full CSS transform for each beat.
+        beats 5 & 6 are centered via translate(-50%,…) so the
+        animation translateY is folded in with calc(). ── */
+  const beats = [
+    { id: 'beat1', center: 0.05, radius: 0.060, tf: ty => `translateY(${ty}px)` },
+    { id: 'beat2', center: 0.21, radius: 0.060, tf: ty => `translateY(${ty}px)` },
+    { id: 'beat3', center: 0.40, radius: 0.055, tf: ty => `translateY(${ty}px)` },
+    { id: 'beat4', center: 0.58, radius: 0.055, tf: ty => `translateY(${ty}px)` },
+    { id: 'beat5', center: 0.76, radius: 0.055, tf: ty => `translate(-50%, calc(-50% + ${ty}px))` },
+    { id: 'beat6', center: 0.92, radius: 0.048, tf: ty => `translate(-50%, calc(-50% + ${ty}px))` },
+  ].map(b => ({ ...b, el: document.getElementById(b.id) }));
+
+  /* Returns opacity + translateY + scale keyed to scroll progress.
+     Enters from below (ty +40), sits at 0, exits upward (ty -32). */
+  function beatAnim(beat, p) {
+    const c = beat.center, r = beat.radius, fade = 0.032;
+    var opacity, ty, sc;
+    if (p < c - r - fade) {
+      opacity = 0; ty = 40; sc = 0.96;
+    } else if (p < c - r) {
+      var tIn = (p - (c - r - fade)) / fade;
+      opacity = tIn; ty = 40 * (1 - tIn); sc = 0.96 + 0.04 * tIn;
+    } else if (p <= c + r) {
+      opacity = 1; ty = 0; sc = 1;
+    } else if (p < c + r + fade) {
+      var tOut = (p - (c + r)) / fade;
+      opacity = 1 - tOut; ty = -32 * tOut; sc = 1 + 0.03 * tOut;
+    } else {
+      opacity = 0; ty = -32; sc = 1.03;
+    }
+    return { opacity: opacity, ty: ty, sc: sc };
+  }
+
+  /* ── Background frame extraction (seek-based, universal) ─────
+     Seeks heroExtract to each frame position and snapshots to
+     canvas. At 4 fps / 40 frames for a 10 s video ≈ 1.5 s. ── */
+  async function extractFrames() {
+    var src = heroExtract;
+
+    if (src.readyState < 1) {
+      await new Promise(function(r) {
+        src.addEventListener('loadedmetadata', r, { once: true });
+      });
+    }
+
+    var duration = src.duration;
+    totalFrames  = Math.ceil(duration * FPS);
+
+    var off    = document.createElement('canvas');
+    off.width  = FRAME_W; off.height = FRAME_H;
+    var offCtx = off.getContext('2d');
+
+    for (var i = 0; i < totalFrames; i++) {
+      src.currentTime = (i / Math.max(totalFrames - 1, 1)) * duration;
+      await new Promise(function(r) {
+        src.addEventListener('seeked', r, { once: true });
+      });
+      offCtx.drawImage(src, 0, 0, FRAME_W, FRAME_H);
+      var snap = document.createElement('canvas');
+      snap.width = FRAME_W; snap.height = FRAME_H;
+      snap.getContext('2d').drawImage(off, 0, 0);
+      frames.push(snap);
+    }
+  }
+
+  var seekActive = true; /* flipped to false when canvas takes over */
+
+  /* ── Loading screen progress ─────────────────────────────────
+     Patch frames.push to update the bar in real time. ── */
+  var ldBar    = document.getElementById('ld-bar');
+  var ldScreen = document.getElementById('loading-screen');
+  var _push0   = Array.prototype.push;
+  (function patchPush() {
+    var _orig = frames.push.bind(frames);
+    frames.push = function() {
+      var r = _orig.apply(frames, arguments);
+      if (totalFrames > 0 && ldBar) {
+        ldBar.style.width = Math.min(100, Math.round(frames.length / totalFrames * 100)) + '%';
+      }
+      return r;
+    };
+  }());
+
+  /* ── PHASE 2 → 3 — extract + silent crossfade ────────────────
+     When done: snap canvas to current scroll position, start the
+     lerp loop, hide loading screen, crossfade video out. ── */
+  extractFrames().then(function() {
+    currentFrameF = targetFrameF = latestProgress * (totalFrames - 1);
+    renderCanvas();
+    canvasReady = true;
+    startCanvasLoop();
+    heroCanvas.style.opacity = '1';
+    heroVideo.style.opacity  = '0';
+
+    if (ldBar) ldBar.style.width = '100%';
+    setTimeout(function() {
+      if (ldScreen) ldScreen.classList.add('hidden');
+    }, 350);
+
+    setTimeout(function() {
+      seekActive = false;
+      heroVideo.style.display = 'none';
+    }, 600);
+  });
+
+  /* ── Header: turns dark when booking bar enters view ── */
+  ScrollTrigger.create({
+    trigger: '#agendar',
+    start: 'top 72px',
+    onEnter:     () => header.classList.add('scrolled'),
+    onLeaveBack: () => header.classList.remove('scrolled'),
+  });
+
+  /* ── Active nav (desktop + drawer) ── */
+  const navSections  = ['inicio','servicos','sobre','contato'];
+  const navLinks     = document.querySelectorAll('.nav-link');
+  const drawerLinks  = document.querySelectorAll('.drawer-nav-link');
+
+  function updateNav() {
+    const pos = window.scrollY + 120;
+    let current = navSections[0];
+    navSections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.offsetTop <= pos) current = id;
+    });
+    const href = '#' + current;
+    navLinks.forEach(a    => a.classList.toggle('active', a.getAttribute('href') === href));
+    drawerLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === href));
+  }
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+
+  /* ── Smooth scrolling ── */
+  function smoothTo(href) {
+    const target = document.querySelector(href);
+    if (target) window.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+  }
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      smoothTo(this.getAttribute('href'));
+    });
+  });
+
+  /* ── Mobile drawer ── */
+  const toggle  = document.getElementById('nav-toggle');
+  const drawer  = document.getElementById('nav-drawer');
+  const overlay = document.getElementById('drawer-overlay');
+
+  function openDrawer() {
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    toggle.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    toggle.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  toggle.addEventListener('click', function() {
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+  });
+  document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  drawerLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      closeDrawer();
+      setTimeout(function() { smoothTo(link.getAttribute('href')); }, 180);
+    });
+  });
+
+  /* ── GSAP ScrollTrigger ──────────────────────────────────────
+     onUpdate fires inside GSAP's own rAF ticker — already
+     batched, one call per frame max. No extra loop needed.
+     Phase 1: set currentTime directly (most reliable scrub).
+     Phase 2/3: update lerp target for the canvas loop. ── */
+  ScrollTrigger.create({
+    trigger: '#inicio',
+    start: 'top top',
+    end: 'bottom bottom',
+    onUpdate: function (self) {
+      latestProgress = self.progress;
+
+      /* Phase 1 — fastSeek() jumps to nearest keyframe instantly,
+         no decoder queue, no freeze on fast scroll. Falls back to
+         currentTime on browsers that don't support fastSeek. */
+      if (seekActive && heroVideo.duration) {
+        var t = self.progress * heroVideo.duration;
+        if (typeof heroVideo.fastSeek === 'function') {
+          heroVideo.fastSeek(t);
+        } else {
+          heroVideo.currentTime = t;
+        }
+      }
+
+      /* Phase 2/3 — lerp target for canvas loop */
+      if (totalFrames > 0) {
+        targetFrameF = self.progress * (totalFrames - 1);
+      }
+
+      /* Overlays — inline, already inside GSAP rAF tick */
+      beats.forEach(function (b) {
+        var a = beatAnim(b, latestProgress);
+        b.el.style.opacity   = a.opacity;
+        b.el.style.transform = b.tf(a.ty);
+      });
+    }
+  });
+
+  /* ── After hero ends, keep bar at 100% ── */
+  ScrollTrigger.create({
+    trigger: '#agendar',
+    start: 'top bottom',
+    onEnter:     () => { if (fill) fill.style.height = '100%'; },
+    onLeaveBack: () => { /* hero ST takes over */ },
+  });
+
+  /* ── Booking form → WhatsApp ── */
+  document.getElementById('booking-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var nome = document.getElementById('bname').value || 'Não informado';
+    var tel  = document.getElementById('tel').value   || 'Não informado';
+    var svc  = document.getElementById('svc').value   || 'Não informado';
+    var veh  = document.getElementById('veh').value   || 'Não informado';
+    var dt   = document.getElementById('dt').value    || 'Não informado';
+    var obs  = document.getElementById('bobs').value;
+    var msg  = 'Olá! Gostaria de agendar um serviço na Speed Car:\n\n'
+             + '👤 Nome: ' + nome + '\n'
+             + '📞 Telefone: ' + tel + '\n'
+             + '🔧 Serviço: ' + svc + '\n'
+             + '🚗 Veículo: ' + veh + '\n'
+             + '📅 Data preferida: ' + dt
+             + (obs ? '\n💬 Observação: ' + obs : '');
+    window.open('https://wa.me/5511968644511?text=' + encodeURIComponent(msg), '_blank');
+  });
+
+  /* ── Contact form → WhatsApp ── */
+  document.getElementById('contact-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name  = document.getElementById('cname').value  || '';
+    var email = document.getElementById('cemail').value || '';
+    var phone = document.getElementById('cphone').value || '';
+    var text  = document.getElementById('cmsg').value   || '';
+    var msg   = 'Olá! Entro em contato pelo site da Speed Car.\n\n'
+              + '👤 Nome: ' + name + '\n'
+              + '✉️ E-mail: ' + email + '\n'
+              + '📞 Telefone: ' + phone + '\n\n'
+              + '💬 Mensagem: ' + text;
+    window.open('https://wa.me/5511968644511?text=' + encodeURIComponent(msg), '_blank');
+  });
+
+})();
+</script>
+
+<!-- ── Leaflet dark map ── -->
+<script>
+(function() {
+  var LAT = -23.3790735, LNG = -47.3309985;
+
+  var map = L.map('contact-map', {
+    center: [LAT, LNG],
+    zoom: 17,
+    scrollWheelZoom: false,
+    zoomControl: true,
+    attributionControl: false
+  });
+
+  /* Carto Dark Matter — no API key required */
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    maxZoom: 20
+  }).addTo(map);
+
+  /* Custom red pulsing marker */
+  var markerHtml = [
+    '<div style="position:relative;width:18px;height:18px">',
+      '<div style="position:absolute;top:-7px;left:-7px;width:32px;height:32px;',
+           'border-radius:50%;background:rgba(225,29,42,0.28);',
+           'animation:mapPulse 2s ease-out infinite"></div>',
+      '<div style="width:18px;height:18px;background:#E11D2A;border-radius:50%;',
+           'border:2.5px solid rgba(255,255,255,0.95);',
+           'box-shadow:0 2px 14px rgba(225,29,42,0.9)"></div>',
+    '</div>'
+  ].join('');
+
+  var icon = L.divIcon({
+    className: '',
+    html: markerHtml,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+    popupAnchor: [0, -14]
+  });
+
+  L.marker([LAT, LNG], { icon: icon })
+    .addTo(map)
+    .bindPopup(
+      '<div style="font-family:Inter,sans-serif;padding:2px 4px">' +
+        '<div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.95);margin-bottom:4px">Speed Car</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.50)">Mecânica & Elétrica · Itu, SP</div>' +
+      '</div>',
+      { maxWidth: 200 }
+    )
+    .openPopup();
+}());
+</script>
+</body>
+</html>
