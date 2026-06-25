@@ -2613,5 +2613,98 @@ footer {
     .openPopup();
 }());
 </script>
+
+<!-- ── Scroll reveal animations ── -->
+<script>
+(function() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  var ease = 'power3.out';
+
+  /* helper: stagger children of each matching element */
+  function revealChildren(selector, opts) {
+    gsap.utils.toArray(selector).forEach(function(parent) {
+      var kids = Array.from(parent.children);
+      if (!kids.length) return;
+      gsap.from(kids, Object.assign({
+        scrollTrigger: { trigger: parent, start: 'top 82%', once: true },
+        y: 36, opacity: 0, duration: 0.75, ease: ease, stagger: 0.12
+      }, opts));
+    });
+  }
+
+  /* ── Serviços ── */
+  gsap.from('#servicos .section-eyebrow, #servicos .section-title, #servicos .red-rule', {
+    scrollTrigger: { trigger: '#servicos .services-header', start: 'top 85%', once: true },
+    y: 28, opacity: 0, duration: 0.8, ease: ease, stagger: 0.14
+  });
+  gsap.from('.service-card', {
+    scrollTrigger: { trigger: '.services-grid', start: 'top 82%', once: true },
+    y: 52, opacity: 0, duration: 0.72, ease: ease, stagger: 0.13,
+    clearProps: 'transform'
+  });
+  gsap.from('.services-cta', {
+    scrollTrigger: { trigger: '.services-cta', start: 'top 90%', once: true },
+    y: 24, opacity: 0, duration: 0.6, ease: ease
+  });
+
+  /* ── Stats ── */
+  gsap.from('.stats-eyebrow', {
+    scrollTrigger: { trigger: '#stats', start: 'top 85%', once: true },
+    y: 24, opacity: 0, duration: 0.7, ease: ease
+  });
+  gsap.from('.stat-item', {
+    scrollTrigger: { trigger: '.stats-grid', start: 'top 82%', once: true },
+    y: 44, opacity: 0, duration: 0.72, ease: ease, stagger: 0.11
+  });
+
+  /* ── Sobre ── */
+  gsap.from('.sobre-visual-col', {
+    scrollTrigger: { trigger: '#sobre', start: 'top 78%', once: true },
+    opacity: 0, scale: 1.05, duration: 1.1, ease: ease
+  });
+  revealChildren('.sobre-text-col', { y: 32, duration: 0.8, stagger: 0.13 });
+
+  /* ── Depoimentos ── */
+  gsap.from('#depoimentos .section-eyebrow, #depoimentos .section-title, #depoimentos .red-rule', {
+    scrollTrigger: { trigger: '#depoimentos', start: 'top 85%', once: true },
+    y: 28, opacity: 0, duration: 0.8, ease: ease, stagger: 0.14
+  });
+
+  /* ── Agendar (booking) ── */
+  revealChildren('.booking-left', { y: 36, duration: 0.78, stagger: 0.13 });
+  gsap.from('.booking-form .form-field', {
+    scrollTrigger: { trigger: '#booking-form', start: 'top 82%', once: true },
+    y: 28, opacity: 0, duration: 0.6, ease: ease, stagger: 0.09, delay: 0.15
+  });
+  gsap.from('#booking-form .btn-red', {
+    scrollTrigger: { trigger: '#booking-form .btn-red', start: 'top 92%', once: true },
+    y: 20, opacity: 0, duration: 0.6, ease: ease, delay: 0.2
+  });
+
+  /* ── Contato ── */
+  revealChildren('.contact-left', { y: 32, duration: 0.78, stagger: 0.12 });
+  gsap.from('.contact-map-col', {
+    scrollTrigger: { trigger: '#contato', start: 'top 78%', once: true },
+    x: 40, opacity: 0, duration: 0.9, ease: ease, delay: 0.2
+  });
+
+  /* ── Instagram CTA ── */
+  gsap.from('#instagram-cta .ig-icon, #instagram-cta .ig-title, #instagram-cta .ig-sub, #instagram-cta .ig-handle, #instagram-cta .btn-red', {
+    scrollTrigger: { trigger: '#instagram-cta', start: 'top 82%', once: true },
+    y: 36, opacity: 0, duration: 0.72, ease: ease, stagger: 0.12
+  });
+
+  /* ── Red rules (scale in from origin) ── */
+  gsap.utils.toArray('.red-rule').forEach(function(el) {
+    var origin = el.classList.contains('center') ? 'center center' : 'left center';
+    gsap.from(el, {
+      scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+      scaleX: 0, transformOrigin: origin, duration: 0.55, ease: 'power2.out', delay: 0.18
+    });
+  });
+
+}());
+</script>
 </body>
 </html>
